@@ -1,0 +1,1 @@
+export { YoloTrainPanel, default } from './YoloTrainPanel';

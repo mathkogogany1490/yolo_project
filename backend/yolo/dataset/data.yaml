@@ -1,0 +1,6 @@
+path: yolo/dataset
+train: images/train
+val: images/val
+
+names:
+  0: object

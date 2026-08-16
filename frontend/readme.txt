@@ -1,0 +1,13 @@
+frontend/src/
+  styles/
+  api/
+  pages/
+    main/
+    menu.js
+  components/
+    layout/
+    glass/
+    auth/
+  query/
+  App.jsx
+  main.jsx

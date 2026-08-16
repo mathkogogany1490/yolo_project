@@ -1,0 +1,23 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+redis
+PyJWT
+bcrypt
+pydantic-settings
+python-multipart
+email-validator
+
+openai
+python-dotenv
+pillow
+transformers
+
+# torch는 Dockerfile에서 CPU wheel로 설치하는 것을 권장
+# (여기 두면 기본 CUDA/큰 wheel이 받아질 수 있음)
+# torch
+# torchvision
+
+ultralytics
+opencv-python>=4.8.0,<4.13.0

@@ -1,0 +1,65 @@
+# env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.ppk
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.uv/
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker / local overrides
+docker-compose.override.yml
+
+# YOLO / ML artifacts (용량 큼)
+backend/yolo/workspace/frames/
+backend/yolo/runs/
+backend/yolo/dataset/runs/
+**/*.pt
+!backend/yolo/checkpoints/yolov8n.pt
+
+# media / archives
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+*.zip
+*.tar
+*.tar.gz
+
+# logs
+*.log
+logs/

@@ -1,0 +1,182 @@
+{
+  "갈비구이": {
+    "calories": 300,
+    "protein": 25,
+    "fat": 20,
+    "carbohydrates": 5
+  },
+  "갈비탕": {
+    "calories": 200,
+    "protein": 15,
+    "fat": 10,
+    "carbohydrates": 5
+  },
+  "갈치구이": {
+    "calories": 250,
+    "protein": 20,
+    "fat": 15,
+    "carbohydrates": 0
+  },
+  "감자채볶음": {
+    "calories": 150,
+    "protein": 3,
+    "fat": 7,
+    "carbohydrates": 20
+  },
+  "계란찜": {
+    "calories": 120,
+    "protein": 10,
+    "fat": 8,
+    "carbohydrates": 2
+  },
+  "김밥": {
+    "calories": 350,
+    "protein": 10,
+    "fat": 8,
+    "carbohydrates": 60
+  },
+  "김치찌개": {
+    "calories": 180,
+    "protein": 10,
+    "fat": 8,
+    "carbohydrates": 15
+  },
+  "깻잎장아찌": {
+    "calories": 50,
+    "protein": 2,
+    "fat": 3,
+    "carbohydrates": 5
+  },
+  "꼬막찜": {
+    "calories": 200,
+    "protein": 25,
+    "fat": 5,
+    "carbohydrates": 10
+  },
+  "된장찌개": {
+    "calories": 150,
+    "protein": 8,
+    "fat": 5,
+    "carbohydrates": 20
+  },
+  "떡볶이": {
+    "calories": 300,
+    "protein": 5,
+    "fat": 5,
+    "carbohydrates": 60
+  },
+  "만두": {
+    "calories": 250,
+    "protein": 10,
+    "fat": 10,
+    "carbohydrates": 35
+  },
+  "물회": {
+    "calories": 200,
+    "protein": 20,
+    "fat": 5,
+    "carbohydrates": 15
+  },
+  "배추김치": {
+    "calories": 20,
+    "protein": 1,
+    "fat": 0,
+    "carbohydrates": 4
+  },
+  "삼계탕": {
+    "calories": 400,
+    "protein": 30,
+    "fat": 20,
+    "carbohydrates": 10
+  },
+  "새우튀김": {
+    "calories": 300,
+    "protein": 15,
+    "fat": 20,
+    "carbohydrates": 15
+  },
+  "소세지볶음": {
+    "calories": 250,
+    "protein": 12,
+    "fat": 18,
+    "carbohydrates": 5
+  },
+  "수정과": {
+    "calories": 150,
+    "protein": 0,
+    "fat": 0,
+    "carbohydrates": 38
+  },
+  "순대": {
+    "calories": 200,
+    "protein": 10,
+    "fat": 15,
+    "carbohydrates": 10
+  },
+  "식혜": {
+    "calories": 120,
+    "protein": 1,
+    "fat": 0,
+    "carbohydrates": 30
+  },
+  "약과": {
+    "calories": 250,
+    "protein": 4,
+    "fat": 10,
+    "carbohydrates": 40
+  },
+  "육회": {
+    "calories": 200,
+    "protein": 25,
+    "fat": 10,
+    "carbohydrates": 0
+  },
+  "자장면": {
+    "calories": 600,
+    "protein": 15,
+    "fat": 20,
+    "carbohydrates": 90
+  },
+  "족발": {
+    "calories": 350,
+    "protein": 30,
+    "fat": 25,
+    "carbohydrates": 5
+  },
+  "찜닭": {
+    "calories": 400,
+    "protein": 30,
+    "fat": 15,
+    "carbohydrates": 50
+  },
+  "콩자반": {
+    "calories": 100,
+    "protein": 5,
+    "fat": 3,
+    "carbohydrates": 15
+  },
+  "피자": {
+    "calories": 300,
+    "protein": 12,
+    "fat": 15,
+    "carbohydrates": 30
+  },
+  "한과": {
+    "calories": 200,
+    "protein": 3,
+    "fat": 5,
+    "carbohydrates": 40
+  },
+  "해물찜": {
+    "calories": 350,
+    "protein": 30,
+    "fat": 15,
+    "carbohydrates": 20
+  },
+  "후라이드치킨": {
+    "calories": 400,
+    "protein": 25,
+    "fat": 30,
+    "carbohydrates": 10
+  }
+}

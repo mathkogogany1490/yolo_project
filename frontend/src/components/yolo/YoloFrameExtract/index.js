@@ -1,0 +1,1 @@
+export { YoloFrameExtract, default } from './YoloFrameExtract';

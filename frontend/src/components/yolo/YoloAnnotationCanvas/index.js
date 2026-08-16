@@ -1,0 +1,1 @@
+export { YoloAnnotationCanvas, default } from './YoloAnnotationCanvas';
