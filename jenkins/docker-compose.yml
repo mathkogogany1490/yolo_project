@@ -1,0 +1,33 @@
+# Jenkins 서버 (로컬)
+# UI: http://127.0.0.1:8080
+# 최초 비밀번호: docker compose exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+#
+# 사용:
+#   cd jenkins && docker compose up -d --build
+
+services:
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: shift_jenkins
+    user: root
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    environment:
+      JAVA_OPTS: >-
+        -Djava.awt.headless=true
+        -Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      # Docker Desktop / local engine 소켓 → Pipeline 에서 docker compose 실행
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Mac: 컨테이너 → 호스트 앱 헬스체크용
+      # (compose 의 host.docker.internal 는 Docker Desktop 기본 제공)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+volumes:
+  jenkins_home:
