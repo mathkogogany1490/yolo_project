@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
 from app.model.user import User  # noqa: F401
+from app.lecture_rag.web import register_lecture_routers
 from app.web.auth_router import router as auth_router
 from app.web.food_nutrition_router import router as nutrition_router
 from app.web.food_nutrition_rag_router import router as nutrition_rag_router
@@ -41,6 +42,7 @@ app.include_router(auth_router)
 app.include_router(nutrition_router)
 app.include_router(nutrition_rag_router)
 app.include_router(yolo_router)
+register_lecture_routers(app)
 
 
 @app.get("/health")

@@ -5,6 +5,7 @@ export const LayoutRoot = styled.div`
   flex-direction: column;
   gap: 16px;
   flex: 1;
+  height: 100svh;
   min-height: 100svh;
   padding: ${({ theme }) => theme.space.page};
   background: transparent;
@@ -21,5 +22,7 @@ export const ContentArea = styled.main`
   flex: 1;
   min-width: 0;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow: auto;
 `;

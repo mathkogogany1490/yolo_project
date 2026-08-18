@@ -40,7 +40,8 @@ class FoodNutritionRagService:
         self.processor = CLIPProcessor.from_pretrained(CLIP_NAME)
         self.clip = CLIPModel.from_pretrained(CLIP_NAME).to(self.device)
         self.clip.eval()
-        self.openai = OpenAI(api_key=settings.OPENAI_API_KEY)
+        api_key = (settings.OPENAI_API_KEY or "").strip()
+        self.openai = OpenAI(api_key=api_key) if api_key else None
 
         self.labels: list[str] = []
         embeddings: list[torch.Tensor] = []
@@ -139,6 +140,8 @@ class FoodNutritionRagService:
         seeds: NutritionInfo,
         candidates: list[RagCandidate],
     ) -> str:
+        if self.openai is None:
+            return self._fallback_answer(food, seeds, candidates)
         cand_txt = ", ".join(
             f"{c.food}({c.score:.2f})" for c in candidates
         )
@@ -150,12 +153,32 @@ class FoodNutritionRagService:
             f"후보: {cand_txt}\n"
             "한글로 2~3문장, 이 음식의 영양과 RAG 검색 결과를 설명해 주세요."
         )
-        resp = self.openai.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "한국어 영양 코치입니다. 짧게 답하세요."},
-                {"role": "user", "content": user},
-            ],
-            temperature=0.4,
+        try:
+            resp = self.openai.chat.completions.create(
+                model=settings.OPENAI_MODEL or "gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "한국어 영양 코치입니다. 짧게 답하세요."},
+                    {"role": "user", "content": user},
+                ],
+                temperature=0.4,
+                timeout=15.0,
+            )
+            return (resp.choices[0].message.content or "").strip() or self._fallback_answer(
+                food, seeds, candidates
+            )
+        except Exception:
+            return self._fallback_answer(food, seeds, candidates)
+
+    def _fallback_answer(
+        self,
+        food: str,
+        seeds: NutritionInfo,
+        candidates: list[RagCandidate],
+    ) -> str:
+        cand_txt = ", ".join(f"{c.food}({c.score:.2f})" for c in candidates[:3])
+        return (
+            f"{food}이(가) 가장 유사한 음식으로 검색되었습니다. "
+            f"칼로리 {seeds.calories}kcal, 단백질 {seeds.protein}g, 지방 {seeds.fat}g, "
+            f"탄수화물 {seeds.carbohydrates}g입니다. "
+            f"주요 후보는 {cand_txt}입니다."
         )
-        return resp.choices[0].message.content.strip()

@@ -30,6 +30,7 @@ export function AppLayout() {
             <LayoutBody>
                 <Sidebar
                     activePath={location.pathname}
+                    activeSearch={location.search}
                     loggedIn={loggedIn}
                     onRequireLogin={(path) => {
                         setPendingPath(path);

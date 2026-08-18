@@ -3,4 +3,6 @@ train: images/train
 val: images/val
 
 names:
-  0: object
+  0: 검은연기
+  1: 흰연기
+  2: 불

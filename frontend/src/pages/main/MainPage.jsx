@@ -11,7 +11,7 @@ export function MainPage() {
                     로그인 후 왼쪽 메뉴에서 기능을 선택하세요.
                 </MainDesc>
                 <MainDesc style={{ marginTop: 16 }}>
-                    영양 분석 · RAG 영양 평가
+                    영양 분석 · RAG 영양 평가 · PCA 강의 RAG
                 </MainDesc>
             </GlassPanel>
         </MainRoot>

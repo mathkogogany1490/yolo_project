@@ -33,8 +33,9 @@ class FoodVLM(nn.Module):
 
     def forward(self, pixel_values: torch.Tensor):
         with torch.no_grad():
-            outputs = self.clip.get_image_features(pixel_values=pixel_values)
-            feat = outputs.pooler_output
+            feat = self.clip.get_image_features(pixel_values=pixel_values)
+            if hasattr(feat, "pooler_output"):
+                feat = feat.pooler_output
         feat = feat / feat.norm(dim=-1, keepdim=True)
         return self.class_head(feat), self.nutrition_head(feat)
 
@@ -62,7 +63,8 @@ class FoodNutritionService:
         self.model.to(self.device)
         self.model.eval()
 
-        self.openai = OpenAI(api_key=settings.OPENAI_API_KEY)
+        api_key = (settings.OPENAI_API_KEY or "").strip()
+        self.openai = OpenAI(api_key=api_key) if api_key else None
 
     def analyze(self, image_bytes: bytes) -> NutritionAnalyzeResponse:
         try:
@@ -100,7 +102,17 @@ class FoodNutritionService:
             answer=answer,
         )
 
+    def _fallback_answer(self, food: str, nutrition: dict) -> str:
+        return (
+            f"{food}은(는) 약 {nutrition['calories']}kcal입니다. "
+            f"단백질 {nutrition['protein']}g, 지방 {nutrition['fat']}g, "
+            f"탄수화물 {nutrition['carbohydrates']}g입니다. "
+            "균형 있게 드시고, 짠 반찬이나 기름진 소스는 양을 조절해 보세요."
+        )
+
     def _openai_answer(self, food: str, nutrition: dict) -> str:
+        if self.openai is None:
+            return self._fallback_answer(food, nutrition)
         user = (
             f"음식: {food}\n"
             f"칼로리 {nutrition['calories']}kcal, "
@@ -109,12 +121,18 @@ class FoodNutritionService:
             f"탄수화물 {nutrition['carbohydrates']}g\n"
             "한글로 2~3문장, 영양 특징과 먹을 때 팁을 알려 주세요."
         )
-        resp = self.openai.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "한국어 영양 코치입니다. 짧게 답하세요."},
-                {"role": "user", "content": user},
-            ],
-            temperature=0.4,
-        )
-        return resp.choices[0].message.content.strip()
+        try:
+            resp = self.openai.chat.completions.create(
+                model=settings.OPENAI_MODEL or "gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "한국어 영양 코치입니다. 짧게 답하세요."},
+                    {"role": "user", "content": user},
+                ],
+                temperature=0.4,
+                timeout=15.0,
+            )
+            return (resp.choices[0].message.content or "").strip() or self._fallback_answer(
+                food, nutrition
+            )
+        except Exception:
+            return self._fallback_answer(food, nutrition)
