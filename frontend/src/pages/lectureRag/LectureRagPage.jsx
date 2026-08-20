@@ -121,6 +121,43 @@ function foldPcaHeard(text) {
     return next;
 }
 
+function foldSvdHeard(text) {
+    const aliases = ['에쓰브이디', '에스브이디', '에스비디', '에스브디'];
+    let next = text;
+    for (const alias of [...aliases].sort((left, right) => right.length - left.length)) {
+        next = next.replace(new RegExp(alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), 'SVD');
+    }
+    next = next.replace(/\bs\s*[.\s]*v\s*[.\s]*d\b/gi, 'SVD');
+    next = next.replace(/행열\s*분해/g, '행렬 분해');
+    return next;
+}
+
+function foldMfHeard(text) {
+    const aliases = ['엠에프', '엠 에프'];
+    let next = text;
+    for (const alias of [...aliases].sort((left, right) => right.length - left.length)) {
+        next = next.replace(new RegExp(alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), 'MF');
+    }
+    next = next.replace(/\bm\s*[.\s]*f\b/gi, 'MF');
+    return next;
+}
+
+function foldTransformerHeard(text) {
+    const aliases = ['트랜스퍼머', '트랜스포마', '트랜스포머'];
+    let next = text;
+    for (const alias of [...aliases].sort((left, right) => right.length - left.length)) {
+        next = next.replace(new RegExp(alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), 'Transformer');
+    }
+    next = next.replace(/어탠션|어텐숀|어텐션/g, 'Attention');
+    next = next.replace(/쿼리\s*,?\s*키/g, 'Query Key');
+    next = next.replace(/query\s*,?\s*key/gi, 'Query Key');
+    return next;
+}
+
+function foldHeard(text) {
+    return foldTransformerHeard(foldMfHeard(foldSvdHeard(foldPcaHeard(text))));
+}
+
 const HEARD_HINTS = [
     '보여줘',
     '보여줘요',
@@ -141,6 +178,26 @@ const HEARD_HINTS = [
     '바이플롯',
     '예측',
     'svd',
+    '에스브이디',
+    '에스비디',
+    '특이값',
+    '영화평점',
+    '평점',
+    '행렬분해',
+    '행렬 분해',
+    'mf',
+    '엠에프',
+    '임베딩',
+    'embedding',
+    '계산',
+    '구조도',
+    'transformer',
+    '트랜스포머',
+    'query',
+    'key',
+    '쿼리',
+    'attention',
+    '어텐션',
 ];
 
 function pickHeard(result) {
@@ -509,7 +566,7 @@ export function LectureRagPage() {
     }, []);
 
     async function applyTurn(text, fromMenu = false) {
-        const cleaned = foldPcaHeard(text.trim());
+        const cleaned = foldHeard(text.trim());
         if (!cleaned) return;
         if (!fromMenu && isVoiceStartCommand(cleaned)) {
             setDraft('');
@@ -587,7 +644,7 @@ export function LectureRagPage() {
 
         rec.onstart = () => {
             setListening(true);
-            setNotice('마이크가 켜졌습니다. PCA 보여 주세요처럼 말씀해 주세요.');
+            setNotice('마이크가 켜졌습니다. PCA / SVD / MF / Transformer 보여 주세요처럼 말씀해 주세요.');
         };
 
         rec.onresult = (event) => {

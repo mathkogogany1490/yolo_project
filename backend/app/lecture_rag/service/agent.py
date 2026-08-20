@@ -159,6 +159,8 @@ SHOW_SCENE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
             "특이값분해",
             "특이값",
             "에스브이디",
+            "에스비디",
+            "에쓰브이디",
             "singular",
         ),
         "svd_intro",
@@ -167,6 +169,7 @@ SHOW_SCENE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
         (
             "평점테이블",
             "영화평점",
+            "영화별점",
             "평점데이터",
             "영화데이터",
             "미관람",
@@ -175,7 +178,9 @@ SHOW_SCENE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
     ),
     (
         (
+            "영화행렬분해",
             "행렬분해",
+            "행열분해",
             "udv",
             "고윳값비교",
             "u행렬",
@@ -186,16 +191,19 @@ SHOW_SCENE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
     ),
     (
         (
+            "svd요약정리",
+            "svd요약",
+            "에스브이디요약",
             "예측값",
             "평점예측",
             "예측평점",
-            "svd요약",
         ),
         "svd_summary",
     ),
     (
         (
             "mf",
+            "엠에프",
             "matrixfactorization",
             "행렬분해란",
             "행렬분해모델",
@@ -207,15 +215,17 @@ SHOW_SCENE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
     ),
     (
         (
-            "임베딩",
-            "embedding",
             "mf임베딩",
             "벡터임베딩",
+            "임베딩이란",
+            "임베딩",
+            "embedding",
         ),
         "mf_embedding",
     ),
     (
         (
+            "영화임베딩",
             "mf평점",
             "mf데이터",
             "mf영화",
@@ -224,6 +234,8 @@ SHOW_SCENE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
     ),
     (
         (
+            "mf계산",
+            "딥러닝계산",
             "잠재요인모델",
             "잠재벡터",
             "pq내적",
@@ -233,6 +245,9 @@ SHOW_SCENE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
     ),
     (
         (
+            "mf딥러닝구조도",
+            "mf구조도",
+            "딥러닝구조도",
             "mf학습",
             "경사하강",
             "sgd학습",
@@ -243,6 +258,7 @@ SHOW_SCENE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
     ),
     (
         (
+            "mf요약정리",
             "mf요약",
             "mf정리",
         ),
@@ -259,6 +275,9 @@ SHOW_SCENE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
     ),
     (
         (
+            "querykey",
+            "쿼리키",
+            "query,key",
             "트랜스포머평점",
             "tf평점",
             "tf영화",
@@ -267,6 +286,8 @@ SHOW_SCENE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
     ),
     (
         (
+            "attention",
+            "어텐션",
             "멀티헤드",
             "multihead",
             "멀티헤드어텐션",
@@ -275,6 +296,9 @@ SHOW_SCENE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
     ),
     (
         (
+            "transformerembedding",
+            "트랜스포머임베딩",
+            "tf임베딩",
             "인코더디코더",
             "encoderdecoder",
             "인코더",
@@ -284,13 +308,18 @@ SHOW_SCENE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
     ),
     (
         (
+            "transformer딥러닝구조도",
+            "트랜스포머딥러닝구조도",
             "트랜스포머구조도",
+            "transformer구조도",
             "tf구조도",
         ),
         "tf_diagram",
     ),
     (
         (
+            "transformer요약정리",
+            "트랜스포머요약정리",
             "트랜스포머요약",
             "tf요약",
             "tf정리",
@@ -299,6 +328,9 @@ SHOW_SCENE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
     ),
     (
         (
+            "pca요약정리",
+            "pca요약",
+            "피씨에이요약",
             "요약정리",
             "요약",
             "바이플롯",
@@ -390,6 +422,21 @@ STT_FOLDS = (
     ("일디에이", "lda"),
     ("바리플롯", "바이플롯"),
     ("민맥스", "minmax"),
+    ("에쓰브이디", "svd"),
+    ("에스브이디", "svd"),
+    ("에스비디", "svd"),
+    ("에스브디", "svd"),
+    ("행열분해", "행렬분해"),
+    ("매트릭스팩토라이제이션", "mf"),
+    ("엠에프", "mf"),
+    ("트랜스퍼머", "transformer"),
+    ("트랜스포마", "transformer"),
+    ("트랜스포머", "transformer"),
+    ("어탠션", "attention"),
+    ("어텐숀", "attention"),
+    ("어텐션", "attention"),
+    ("큐어리키", "querykey"),
+    ("쿼리키", "querykey"),
 )
 NEXT_SCENE_MARKERS = (
     "다음그래프",
@@ -454,23 +501,23 @@ CANONICAL_SHOW_COMMANDS: dict[str, list[str]] = {
     "iris_cov_eigen": ["공분산 보여 주세요", "공분산 다시 보여 주세요"],
     "iris_pca_2d": ["선형변환 보여 주세요", "선형변환 다시 보여 주세요"],
     "iris_lda": ["lda 보여 주세요", "lda 다시 보여 주세요"],
-    "summary": ["요약 보여 주세요", "요약 다시 보여 주세요"],
-    "svd_intro": ["SVD 보여 주세요", "SVD 다시 보여 주세요"],
-    "svd_ratings": ["평점 테이블 보여 주세요", "영화 평점 보여 주세요"],
-    "svd_decompose": ["행렬분해 보여 주세요", "행렬분해 다시 보여 주세요"],
-    "svd_summary": ["SVD 요약 보여 주세요", "예측값 보여 주세요"],
-    "mf_intro": ["MF 보여 주세요", "행렬분해 모델 보여 주세요"],
-    "mf_embedding": ["임베딩 보여 주세요", "MF 임베딩 보여 주세요"],
-    "mf_ratings": ["MF 평점 테이블 보여 주세요", "MF 영화 평점 보여 주세요"],
-    "mf_model": ["MF 딥러닝 보여 주세요", "MF 딥러닝 계산 보여 주세요"],
-    "mf_training": ["딥러닝 구조도 보여 주세요", "MF 구조도 보여 주세요"],
-    "mf_summary": ["MF 요약 보여 주세요", "MF 요약정리 보여 주세요"],
-    "tf_intro": ["Transformer 보여 주세요", "트랜스포머 보여 주세요"],
-    "tf_attention": ["Query Key 보여 주세요", "QUERY KEY 보여 주세요", "쿼리 키 보여 주세요"],
-    "tf_multihead": ["Attention Value 보여 주세요", "어텐션 밸류 보여 주세요", "소프트맥스 보여 주세요"],
-    "tf_encoder": ["Embedding 보여 주세요", "임베딩 보여 주세요", "트랜스포머 임베딩 보여 주세요"],
-    "tf_diagram": ["트랜스포머 구조도 보여 주세요", "Transformer 구조도 보여 주세요"],
-    "tf_summary": ["트랜스포머 요약 보여 주세요", "Transformer 요약정리 보여 주세요"],
+    "summary": ["PCA 요약 정리 보여 주세요", "PCA 요약 정리 보여줘", "PCA 요약 보여 주세요"],
+    "svd_intro": ["SVD 보여 주세요", "SVD 보여줘", "SVD 다시 보여 주세요"],
+    "svd_ratings": ["영화 평점 보여 주세요", "영화 평점 보여줘", "평점 테이블 보여 주세요"],
+    "svd_decompose": ["행렬 분해 보여 주세요", "행렬 분해 보여줘", "행렬분해 다시 보여 주세요"],
+    "svd_summary": ["SVD 요약 정리 보여 주세요", "SVD 요약 정리 보여줘", "SVD 요약 보여 주세요"],
+    "mf_intro": ["MF 보여 주세요", "MF 보여줘"],
+    "mf_embedding": ["임베딩 보여 주세요", "임베딩 보여줘", "MF 임베딩 보여 주세요"],
+    "mf_ratings": ["영화 임베딩 보여 주세요", "영화 임베딩 보여줘"],
+    "mf_model": ["MF 계산 보여 주세요", "MF 계산 보여줘"],
+    "mf_training": ["MF 딥러닝 구조도 보여 주세요", "MF 딥러닝 구조도 보여줘"],
+    "mf_summary": ["MF 요약 정리 보여 주세요", "MF 요약 정리 보여줘"],
+    "tf_intro": ["Transformer 보여 주세요", "transformer 보여줘", "트랜스포머 보여 주세요"],
+    "tf_attention": ["Query, key 보여줘", "Query Key 보여 주세요", "쿼리 키 보여 주세요"],
+    "tf_multihead": ["attention 보여줘", "Attention 보여 주세요", "어텐션 보여 주세요"],
+    "tf_encoder": ["transformer embedding 보여줘", "Transformer 임베딩 보여 주세요"],
+    "tf_diagram": ["transformer 딥러닝 구조도 보여줘", "Transformer 딥러닝 구조도 보여 주세요"],
+    "tf_summary": ["transformer 요약정리 보여줘", "Transformer 요약 정리 보여 주세요"],
 }
 PHRASE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
     (("고유값", "고유벡터", "고윳값", "eigenvalue", "eigenvector"), "eigen_demo"),
@@ -485,24 +532,25 @@ PHRASE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
     (("선형변환", "4차원", "2차원", "가중치행렬", "y=a"), "iris_pca_2d"),
     (("lda", "선형판별", "판별분석", "fisher", "피셔", "축회전"), "iris_lda"),
     (("원본데이터", "원래데이터", "원래그래프", "원본산점", "원본그래프", "산점도", "분포보여"), "iris_data"),
-    (("정리해", "요약해", "요약정리", "마무리", "결론"), "summary"),
+    (("pca요약정리", "pca요약", "피씨에이요약"), "summary"),
     (("pca란", "pca가", "pca", "피씨에이", "주성분분석", "소개할게요", "도입", "무엇인지", "무엇인가"), "intro"),
-    (("svd란", "svd가", "svd", "에스브이디", "특이값분해", "특이값", "singular"), "svd_intro"),
-    (("평점테이블", "영화평점", "평점데이터", "영화데이터", "미관람", "추정"), "svd_ratings"),
-    (("행렬분해", "udv", "고윳값비교", "u행렬", "v행렬", "분해검증"), "svd_decompose"),
-    (("예측값", "평점예측", "예측평점", "svd요약"), "svd_summary"),
+    (("svd란", "svd가", "svd", "에스브이디", "에스비디", "특이값분해", "특이값", "singular"), "svd_intro"),
+    (("평점테이블", "영화평점", "영화별점", "평점데이터", "영화데이터", "미관람", "추정"), "svd_ratings"),
+    (("영화행렬분해", "행렬분해", "행열분해", "udv", "고윳값비교", "u행렬", "v행렬", "분해검증"), "svd_decompose"),
+    (("svd요약정리", "svd요약", "에스브이디요약", "예측값", "평점예측", "예측평점"), "svd_summary"),
     (("mf", "matrixfactorization", "행렬분해란", "잠재요인", "matrixfactorisation"), "mf_intro"),
-    (("임베딩", "embedding", "mf임베딩", "벡터임베딩"), "mf_embedding"),
-    (("mf평점", "mf데이터", "mf영화"), "mf_ratings"),
+    (("임베딩이란", "mf임베딩", "벡터임베딩"), "mf_embedding"),
+    (("영화임베딩", "mf평점", "mf데이터", "mf영화"), "mf_ratings"),
     (("mf딥러닝", "딥러닝계산", "mf계산"), "mf_model"),
-    (("딥러닝구조도", "구조도", "네트워크그림"), "mf_training"),
-    (("mf요약", "mf정리"), "mf_summary"),
+    (("mf딥러닝구조도", "딥러닝구조도", "mf구조도", "네트워크그림"), "mf_training"),
+    (("mf요약정리", "mf요약", "mf정리"), "mf_summary"),
     (("트랜스포머란", "transformer", "트랜스포머"), "tf_intro"),
-    (("쿼리키", "querykey", "query", "쿼리"), "tf_attention"),
-    (("어텐션", "attention", "소프트맥스", "softmax", "어텐션밸류", "attentionvalue", "attention value"), "tf_multihead"),
-    (("임베딩", "embedding", "tf임베딩", "트랜스포머임베딩"), "tf_encoder"),
-    (("트랜스포머구조도", "tf구조도"), "tf_diagram"),
-    (("트랜스포머요약", "tf요약", "tf정리"), "tf_summary"),
+    (("쿼리키", "querykey", "query key", "쿼리 키"), "tf_attention"),
+    (("어텐션", "attention", "소프트맥스", "softmax", "어텐션밸류", "attentionvalue"), "tf_multihead"),
+    (("transformerembedding", "트랜스포머임베딩", "tf임베딩"), "tf_encoder"),
+    (("트랜스포머딥러닝구조도", "transformer구조도", "트랜스포머구조도", "tf구조도"), "tf_diagram"),
+    (("transformer요약정리", "트랜스포머요약정리", "트랜스포머요약", "tf요약", "tf정리"), "tf_summary"),
+    (("정리해", "요약해", "요약정리", "마무리", "결론"), "summary"),
 ]
 
 
@@ -582,7 +630,12 @@ def _close_enough(left: str, right: str) -> bool:
         return False
     if min(len(left), len(right)) < 2:
         return left == right
-    if left == right or left in right or right in left:
+    if left == right:
+        return True
+    if left in right or right in left:
+        shorter, longer = (left, right) if len(left) <= len(right) else (right, left)
+        if longer.startswith(shorter) and len(longer) - len(shorter) >= 2:
+            return False
         return True
     return SequenceMatcher(None, left, right).ratio() >= 0.68
 
@@ -592,21 +645,65 @@ def match_show_scene(text: str) -> SceneId | None:
         return None
     compact = _fold_lecture_stt(_normalize(text))
     topic = _topic_after_show(compact)
+    if _wants_pca_summary(compact):
+        return "summary"
+    if _wants_svd_summary(compact):
+        return "svd_summary"
+    if _wants_mf_summary(compact):
+        return "mf_summary"
+    if _wants_tf_summary(compact):
+        return "tf_summary"
+    if _wants_svd_ratings(compact):
+        return "svd_ratings"
+    if _wants_svd_decompose(compact):
+        return "svd_decompose"
+    if _wants_svd_intro(compact) or topic in {"svd", "에스브이디", "에스비디"}:
+        return "svd_intro"
+    if _wants_tf_diagram(compact):
+        return "tf_diagram"
+    if _wants_tf_encoder(compact):
+        return "tf_encoder"
+    if _wants_tf_multihead(compact):
+        return "tf_multihead"
+    if _wants_tf_attention(compact):
+        return "tf_attention"
+    if _wants_tf_intro(compact) or topic in {"transformer", "트랜스포머"}:
+        return "tf_intro"
+    if _wants_mf_training(compact):
+        return "mf_training"
+    if _wants_mf_model(compact):
+        return "mf_model"
+    if _wants_mf_ratings(compact):
+        return "mf_ratings"
+    if _wants_mf_embedding(compact):
+        return "mf_embedding"
+    if _wants_mf_intro(compact) or topic in {"mf"}:
+        return "mf_intro"
     if _wants_pca_intro(compact) or topic in {"pca", "pc"}:
         return "intro"
-    ranked: list[tuple[int, SceneId]] = []
+    ranked: list[tuple[int, int, SceneId]] = []
+    skip = {"intro", "svd_intro", "mf_intro", "tf_intro"}
     for keywords, scene in SHOW_SCENE_RULES:
-        if scene == "intro":
+        if scene in skip:
             continue
+        exact_len = 0
+        fuzzy_len = 0
         for keyword in keywords:
-            token = _fold_pca_stt(_normalize(keyword))
-            if token and (token in compact or _close_enough(topic, token)):
-                ranked.append((len(token), scene))
-                break
+            token = _fold_lecture_stt(_normalize(keyword))
+            if not token:
+                continue
+            if token in compact:
+                exact_len = max(exact_len, len(token))
+            elif not exact_len and _close_enough(topic, token):
+                fuzzy_len = max(fuzzy_len, len(token))
+        if exact_len:
+            ranked.append((2, exact_len, scene))
+        elif fuzzy_len:
+            ranked.append((1, fuzzy_len, scene))
     if not ranked:
         return None
     ranked.sort(reverse=True)
-    return ranked[0][1]
+    return ranked[0][2]
 
 
 def match_scene_id(text: str) -> SceneId | None:
@@ -638,7 +735,154 @@ def _normalize(text: str) -> str:
 def _wants_pca_intro(compact: str) -> bool:
     if any(marker in compact for marker in LINEAR_SHOW_MARKERS):
         return False
+    if _has_summary_words(compact):
+        return False
+    return _has_pca(compact)
+
+
+SUMMARY_MARKERS = ("요약정리", "요약", "정리")
+MF_INTRO_MARKERS = ("mf", "엠에프", "matrixfactorization", "matrixfactorisation")
+TF_INTRO_MARKERS = ("transformer", "트랜스포머", "트랜스퍼머", "트랜스포마")
+
+
+def _has_summary_words(compact: str) -> bool:
+    return any(token in compact for token in SUMMARY_MARKERS)
+
+
+def _has_pca(compact: str) -> bool:
     return any(marker in compact for marker in PCA_INTRO_MARKERS)
+
+
+def _has_svd(compact: str) -> bool:
+    return any(marker in compact for marker in SVD_INTRO_MARKERS)
+
+
+def _has_mf(compact: str) -> bool:
+    return any(marker in compact for marker in MF_INTRO_MARKERS)
+
+
+def _has_tf(compact: str) -> bool:
+    return any(marker in compact for marker in TF_INTRO_MARKERS)
+
+
+def _has_embedding(compact: str) -> bool:
+    return "embedding" in compact or "임베딩" in compact
+
+
+def _wants_pca_summary(compact: str) -> bool:
+    return _has_pca(compact) and _has_summary_words(compact)
+
+
+SVD_INTRO_MARKERS = (
+    "svd",
+    "에스브이디",
+    "에스비디",
+    "에쓰브이디",
+    "특이값분해",
+    "특이값",
+    "singular",
+)
+SVD_SUMMARY_MARKERS = ("svd요약정리", "svd요약", "에스브이디요약", "예측값", "평점예측", "예측평점")
+SVD_RATINGS_MARKERS = ("영화평점", "영화별점", "평점테이블", "평점데이터", "영화데이터")
+MF_DECOMPOSE_MARKERS = ("mf", "모델", "잠재요인", "딥러닝", "ncf")
+
+
+def _wants_svd_summary(compact: str) -> bool:
+    if any(marker in compact for marker in SVD_INTRO_MARKERS) and any(
+        token in compact for token in ("요약정리", "요약", "정리")
+    ):
+        return True
+    return any(marker in compact for marker in SVD_SUMMARY_MARKERS)
+
+
+def _wants_svd_ratings(compact: str) -> bool:
+    if "영화" in compact and "평점" in compact:
+        return True
+    if "영화" in compact and "별점" in compact:
+        return True
+    return any(marker in compact for marker in SVD_RATINGS_MARKERS)
+
+
+def _wants_svd_decompose(compact: str) -> bool:
+    if "행렬분해" not in compact and "행열분해" not in compact:
+        return False
+    return not any(marker in compact for marker in MF_DECOMPOSE_MARKERS)
+
+
+def _wants_svd_intro(compact: str) -> bool:
+    if _wants_svd_summary(compact) or _wants_svd_ratings(compact) or _wants_svd_decompose(compact):
+        return False
+    return any(marker in compact for marker in SVD_INTRO_MARKERS)
+
+
+def _wants_mf_summary(compact: str) -> bool:
+    return _has_mf(compact) and _has_summary_words(compact)
+
+
+def _wants_mf_training(compact: str) -> bool:
+    if _has_tf(compact) or "구조도" not in compact:
+        return False
+    return _has_mf(compact) or "딥러닝" in compact
+
+
+def _wants_mf_model(compact: str) -> bool:
+    return _has_mf(compact) and "계산" in compact
+
+
+def _wants_mf_ratings(compact: str) -> bool:
+    if _has_tf(compact):
+        return False
+    return "영화" in compact and _has_embedding(compact)
+
+
+def _wants_mf_embedding(compact: str) -> bool:
+    if _has_tf(compact) or "영화" in compact or not _has_embedding(compact):
+        return False
+    return True
+
+
+def _wants_mf_intro(compact: str) -> bool:
+    if not _has_mf(compact):
+        return False
+    if _wants_mf_summary(compact) or _wants_mf_training(compact) or _wants_mf_model(compact):
+        return False
+    if _wants_mf_ratings(compact) or _wants_mf_embedding(compact):
+        return False
+    return True
+
+
+def _wants_tf_summary(compact: str) -> bool:
+    return _has_tf(compact) and _has_summary_words(compact)
+
+
+def _wants_tf_diagram(compact: str) -> bool:
+    return _has_tf(compact) and "구조도" in compact
+
+
+def _wants_tf_encoder(compact: str) -> bool:
+    return _has_tf(compact) and _has_embedding(compact)
+
+
+def _wants_tf_multihead(compact: str) -> bool:
+    return "attention" in compact or "어텐션" in compact
+
+
+def _wants_tf_attention(compact: str) -> bool:
+    if "querykey" in compact or "쿼리키" in compact:
+        return True
+    has_query = "query" in compact or "쿼리" in compact
+    has_key = "key" in compact or "키" in compact
+    return has_query and has_key
+
+
+def _wants_tf_intro(compact: str) -> bool:
+    if not _has_tf(compact):
+        return False
+    if _wants_tf_summary(compact) or _wants_tf_diagram(compact) or _wants_tf_encoder(compact):
+        return False
+    if _wants_tf_multihead(compact) or _wants_tf_attention(compact):
+        return False
+    return True
 
 
 def resolve_column(name: str | None, columns: list[str]) -> str | None:
@@ -675,7 +919,44 @@ def route_by_keyword(text: str, current: SceneId) -> SceneId:
         if stripped == meta["title"]:
             return scene_id
 
-    compact = _normalize(text)
+    compact = _fold_lecture_stt(_normalize(text))
+
+    if _wants_pca_summary(compact):
+        return "summary"
+    if _wants_svd_summary(compact):
+        return "svd_summary"
+    if _wants_mf_summary(compact):
+        return "mf_summary"
+    if _wants_tf_summary(compact):
+        return "tf_summary"
+    if _wants_svd_ratings(compact):
+        return "svd_ratings"
+    if _wants_svd_decompose(compact):
+        return "svd_decompose"
+    if _wants_svd_intro(compact):
+        return "svd_intro"
+    if _wants_tf_diagram(compact):
+        return "tf_diagram"
+    if _wants_tf_encoder(compact):
+        return "tf_encoder"
+    if _wants_tf_multihead(compact):
+        return "tf_multihead"
+    if _wants_tf_attention(compact):
+        return "tf_attention"
+    if _wants_tf_intro(compact):
+        return "tf_intro"
+    if _wants_mf_training(compact):
+        return "mf_training"
+    if _wants_mf_model(compact):
+        return "mf_model"
+    if _wants_mf_ratings(compact):
+        return "mf_ratings"
+    if _wants_mf_embedding(compact):
+        return "mf_embedding"
+    if _wants_mf_intro(compact):
+        return "mf_intro"
+    if _wants_pca_intro(compact):
+        return "intro"
 
     for keywords, scene in PHRASE_RULES:
         if any(_normalize(keyword) in compact for keyword in keywords):
@@ -984,12 +1265,16 @@ def interpret_without_openai(
     else:
         scene = current
 
-    if scene == "summary" and str(current).startswith("svd_"):
-        scene = "svd_summary"
-    if scene == "summary" and str(current).startswith("mf_"):
-        scene = "mf_summary"
-    if scene == "summary" and str(current).startswith("tf_"):
-        scene = "tf_summary"
+    folded = _fold_lecture_stt(_normalize(text))
+    if scene == "summary":
+        if _wants_pca_summary(folded) or _has_pca(folded):
+            scene = "summary"
+        elif _wants_svd_summary(folded) or _has_svd(folded) or str(current).startswith("svd_"):
+            scene = "svd_summary"
+        elif _wants_mf_summary(folded) or _has_mf(folded) or str(current).startswith("mf_"):
+            scene = "mf_summary"
+        elif _wants_tf_summary(folded) or _has_tf(folded) or str(current).startswith("tf_"):
+            scene = "tf_summary"
 
     if scene == "iris_data" and dataset is None:
         dataset = "iris"
@@ -1189,16 +1474,32 @@ def classify_lecture_intent(text: str, current: SceneId) -> dict[str, Any]:
                     "당신은 강의 음성/입력을 걸러내는 분류기입니다. JSON만 반환합니다.\n"
                     "키: intent, scene, explanation\n"
                     "intent 값:\n"
-                    "- show_scene: 01~07 강의 화면을 보여 달라는 명령. "
-                    "오인식(피씨에이, 보여주세여, 보여줘, 띄워줘)도 명령으로 봅니다.\n"
+                    "- show_scene: 강의 화면을 보여 달라는 명령. "
+                    "오인식(피씨에이, 에스브이디, 보여주세여, 보여줘, 띄워줘)도 명령으로 봅니다.\n"
                     "- question: 지금 화면에 대한 질문/설명 요청. 화면을 바꾸면 안 됩니다.\n"
                     "- ignore: 강의와 무관하거나, 잘린 말, 잡음, 명령이 아님.\n"
                     "scene:\n"
                     "- show_scene일 때만 intro, eigen_demo, iris_data, iris_cov_eigen, "
-                    "iris_pca_2d, iris_lda, summary 중 하나.\n"
+                    "iris_pca_2d, iris_lda, summary, svd_intro, svd_ratings, "
+                    "svd_decompose, svd_summary, mf_intro, mf_embedding, mf_ratings, "
+                    "mf_model, mf_training, mf_summary, tf_intro, tf_attention, "
+                    "tf_multihead, tf_encoder, tf_diagram, tf_summary 중 하나.\n"
                     "- question, ignore 는 null.\n"
                     "- 'PCA/주성분분석 보여 주세요' 는 intro. "
+                    "'PCA 요약 정리 보여줘' 는 summary(07). "
                     "iris_pca_2d 는 선형변환·4차원→2차원일 때만.\n"
+                    "- 'SVD 보여줘' 는 svd_intro(01). '영화 평점 보여줘' 는 svd_ratings(02). "
+                    "'행렬 분해 보여줘' 는 svd_decompose(03). "
+                    "'SVD 요약 정리 보여줘' 는 svd_summary(04).\n"
+                    "- 'MF 보여줘' 는 mf_intro(01). '임베딩 보여줘' 는 mf_embedding(02). "
+                    "'영화 임베딩 보여줘' 는 mf_ratings(03). 'MF 계산 보여줘' 는 mf_model(04). "
+                    "'MF 딥러닝 구조도 보여줘' 는 mf_training(05). "
+                    "'MF 요약 정리 보여줘' 는 mf_summary(06).\n"
+                    "- 'transformer 보여줘' 는 tf_intro(01). 'Query, key 보여줘' 는 tf_attention(02). "
+                    "'attention 보여줘' 는 tf_multihead(03). "
+                    "'transformer embedding 보여줘' 는 tf_encoder(04). "
+                    "'transformer 딥러닝 구조도 보여줘' 는 tf_diagram(05). "
+                    "'transformer 요약정리 보여줘' 는 tf_summary(06).\n"
                     "explanation:\n"
                     "- question일 때만 강의 설명 2~4문장.\n"
                     "- show_scene, ignore 는 빈 문자열.\n"
