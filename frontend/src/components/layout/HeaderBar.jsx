@@ -5,10 +5,18 @@ import {
     HeaderTitle,
 } from './HeaderBar.styles';
 
-export function HeaderBar({ loggedIn, onLogin, onRegister, onLogout }) {
+export function HeaderBar({ loggedIn, onLogin, onRegister, onLogout, onHome }) {
     return (
         <HeaderBarRoot>
-            <HeaderTitle>MyHome</HeaderTitle>
+            <HeaderTitle
+                href="/"
+                onClick={(e) => {
+                    e.preventDefault();
+                    onHome?.();
+                }}
+            >
+                MyHome
+            </HeaderTitle>
             <HeaderActions>
                 {loggedIn ? (
                     <HeaderButton type="button" onClick={onLogout}>

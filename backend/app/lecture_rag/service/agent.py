@@ -12,6 +12,42 @@ from openai import OpenAI
 from ..config import OPENAI_API_KEY, OPENAI_MODEL
 from ..schema.scene import CHART_SCENES, SCENE_META, SCENE_ORDER, SceneId, next_chart_scene
 from .iris import iris_explanation, iris_views
+from .mf import (
+    mf_embedding_explanation,
+    mf_embedding_views,
+    mf_intro_explanation,
+    mf_intro_views,
+    mf_model_explanation,
+    mf_model_views,
+    mf_ratings_explanation,
+    mf_ratings_views,
+    mf_summary_explanation,
+    mf_summary_views,
+    mf_training_explanation,
+    mf_training_views,
+)
+from .svd import (
+    svd_decompose_explanation,
+    svd_decompose_views,
+    svd_ratings_explanation,
+    svd_ratings_views,
+    svd_summary_explanation,
+    svd_summary_views,
+)
+from .transformer import (
+    tf_attention_explanation,
+    tf_attention_views,
+    tf_diagram_explanation,
+    tf_diagram_views,
+    tf_encoder_explanation,
+    tf_encoder_views,
+    tf_intro_explanation,
+    tf_intro_views,
+    tf_multihead_explanation,
+    tf_multihead_views,
+    tf_summary_explanation,
+    tf_summary_views,
+)
 from .iris_lda import iris_lda_explanation, iris_lda_views
 from .iris_cov import (
     iris_cov_eigen_explanation,
@@ -20,27 +56,292 @@ from .iris_cov import (
     iris_pca_2d_views,
 )
 
-# 음성/입력으로 01~07을 바꿀 때 쓰는 주제 단어. 보여 주세요류와 함께 써야 한다.
+# 음성/입력으로 01~07을 바꿀 때 쓰는 주제 단어.
 SHOW_SCENE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
-    (("고유벡터", "고유벡타", "고윳값", "고유값", "아이겐", "eigen"), "eigen_demo"),
-    (("붓꽃데이터", "붓꽃", "아이리스", "아이리스데이터", "iris"), "iris_data"),
-    (("선형변환", "선영변환", "차원축소"), "iris_pca_2d"),
-    (("공분산", "공분선"), "iris_cov_eigen"),
-    (("lda", "엘디에이", "엘디에", "선형판별"), "iris_lda"),
-    (("pca", "pc", "피씨에이", "피시에이", "피스이에이", "피시아이", "피씨아이", "비씨에이", "피씨에", "피시에", "피씨", "주성분분석", "주성분"), "intro"),
-    (("요약정리", "요약", "바이플롯", "biplot"), "summary"),
+    (
+        (
+            "고유벡터",
+            "고유벡타",
+            "고유벡처",
+            "고윳값",
+            "고유값",
+            "고육값",
+            "고유갑",
+            "아이겐벡터",
+            "아이겐밸류",
+            "아이겐",
+            "eigenvalue",
+            "eigenvector",
+            "eigen",
+        ),
+        "eigen_demo",
+    ),
+    (
+        (
+            "붓꽃데이터",
+            "불꽃데이터",
+            "부꽃데이터",
+            "붓꽃",
+            "불꽃",
+            "아이리스데이터",
+            "아이리스",
+            "irisdata",
+            "iris",
+        ),
+        "iris_data",
+    ),
+    (
+        (
+            "선형변환",
+            "선영변환",
+            "선협변환",
+            "차원축소",
+            "4차원",
+            "사차원",
+            "2차원",
+            "이차원",
+            "가중치행렬",
+            "pc1pc2",
+            "피씨원",
+        ),
+        "iris_pca_2d",
+    ),
+    (
+        (
+            "공분산행렬",
+            "공분산",
+            "공분선",
+            "상관계수",
+            "상관행렬",
+            "minmax",
+            "민맥스",
+            "정규화",
+        ),
+        "iris_cov_eigen",
+    ),
+    (
+        (
+            "lda",
+            "엘디에이",
+            "엘디아이",
+            "엘디에",
+            "일디에이",
+            "선형판별",
+            "판별분석",
+            "피셔",
+        ),
+        "iris_lda",
+    ),
+    (
+        (
+            "pca",
+            "pc",
+            "피씨에이",
+            "피시에이",
+            "피스이에이",
+            "피시아이",
+            "피씨아이",
+            "비씨에이",
+            "비시에이",
+            "피사에이",
+            "피씨에",
+            "피시에",
+            "피씨",
+            "주성분분석",
+            "주성분",
+            "피씨에이란",
+        ),
+        "intro",
+    ),
+    (
+        (
+            "svd",
+            "특이값분해",
+            "특이값",
+            "에스브이디",
+            "singular",
+        ),
+        "svd_intro",
+    ),
+    (
+        (
+            "평점테이블",
+            "영화평점",
+            "평점데이터",
+            "영화데이터",
+            "미관람",
+        ),
+        "svd_ratings",
+    ),
+    (
+        (
+            "행렬분해",
+            "udv",
+            "고윳값비교",
+            "u행렬",
+            "v행렬",
+            "분해검증",
+        ),
+        "svd_decompose",
+    ),
+    (
+        (
+            "예측값",
+            "평점예측",
+            "예측평점",
+            "svd요약",
+        ),
+        "svd_summary",
+    ),
+    (
+        (
+            "mf",
+            "matrixfactorization",
+            "행렬분해란",
+            "행렬분해모델",
+            "잠재요인",
+            "잠재요인분해",
+            "matrixfactorisation",
+        ),
+        "mf_intro",
+    ),
+    (
+        (
+            "임베딩",
+            "embedding",
+            "mf임베딩",
+            "벡터임베딩",
+        ),
+        "mf_embedding",
+    ),
+    (
+        (
+            "mf평점",
+            "mf데이터",
+            "mf영화",
+        ),
+        "mf_ratings",
+    ),
+    (
+        (
+            "잠재요인모델",
+            "잠재벡터",
+            "pq내적",
+            "pq모델",
+        ),
+        "mf_model",
+    ),
+    (
+        (
+            "mf학습",
+            "경사하강",
+            "sgd학습",
+            "딥러닝mf",
+            "ncf",
+        ),
+        "mf_training",
+    ),
+    (
+        (
+            "mf요약",
+            "mf정리",
+        ),
+        "mf_summary",
+    ),
+    (
+        (
+            "트랜스포머란",
+            "transformer란",
+            "transformer",
+            "트랜스포머",
+        ),
+        "tf_intro",
+    ),
+    (
+        (
+            "트랜스포머평점",
+            "tf평점",
+            "tf영화",
+        ),
+        "tf_attention",
+    ),
+    (
+        (
+            "멀티헤드",
+            "multihead",
+            "멀티헤드어텐션",
+        ),
+        "tf_multihead",
+    ),
+    (
+        (
+            "인코더디코더",
+            "encoderdecoder",
+            "인코더",
+            "디코더",
+        ),
+        "tf_encoder",
+    ),
+    (
+        (
+            "트랜스포머구조도",
+            "tf구조도",
+        ),
+        "tf_diagram",
+    ),
+    (
+        (
+            "트랜스포머요약",
+            "tf요약",
+            "tf정리",
+        ),
+        "tf_summary",
+    ),
+    (
+        (
+            "요약정리",
+            "요약",
+            "바이플롯",
+            "바리플롯",
+            "biplot",
+            "마무리",
+            "결론",
+        ),
+        "summary",
+    ),
 ]
 SHOW_TAILS = (
     "다시한번보여주세요",
     "다시보여주세요",
+    "화면보여주세요",
+    "그래프보여주세요",
     "보여주세요",
+    "보여주시겠어요",
+    "보여주실래요",
+    "보여주십쇼",
+    "보여주시요",
+    "보여주이소",
+    "보여주셔요",
     "보여주세여",
     "보여주세오",
     "보여주새요",
     "보여주세용",
+    "보여주세",
+    "보여줘",
+    "보여죠",
+    "보여주라",
+    "보여봐주세요",
+    "보여봐",
+    "보호주세요",
+    "보요주세요",
+    "띄워주세요",
+    "띄워줘",
+    "다시봅시다",
+    "다시보자",
+    "다시한번",
 )
 
-LINEAR_SHOW_MARKERS = ("선형변환", "선영변환", "차원축소", "4차원", "2차원", "가중치행렬")
+LINEAR_SHOW_MARKERS = ("선형변환", "선영변환", "선협변환", "차원축소", "4차원", "사차원", "2차원", "이차원", "가중치행렬")
 PCA_INTRO_MARKERS = (
     "pca",
     "피씨에이",
@@ -48,6 +349,8 @@ PCA_INTRO_MARKERS = (
     "피스이에이",
     "피시아이",
     "비씨에이",
+    "비시에이",
+    "피사에이",
     "피씨",
     "주성분분석",
     "주성분",
@@ -59,12 +362,85 @@ PCA_STT_ALIASES = (
     "피시아이",
     "피씨아이",
     "비씨에이",
+    "비시에이",
     "티씨에이",
+    "디씨에이",
+    "피사에이",
     "피씨에",
     "피시에",
     "피씨",
     "pc에이",
+    "pc에",
 )
+STT_FOLDS = (
+    ("불꽃데이터", "붓꽃데이터"),
+    ("부꽃데이터", "붓꽃데이터"),
+    ("붓꼿", "붓꽃"),
+    ("불꽃", "붓꽃"),
+    ("부꽃", "붓꽃"),
+    ("고육값", "고유값"),
+    ("고유갑", "고유값"),
+    ("고윳갑", "고윳값"),
+    ("고유벡처", "고유벡터"),
+    ("고유벡타", "고유벡터"),
+    ("공분선", "공분산"),
+    ("선영변환", "선형변환"),
+    ("선협변환", "선형변환"),
+    ("엘디아이", "lda"),
+    ("일디에이", "lda"),
+    ("바리플롯", "바이플롯"),
+    ("민맥스", "minmax"),
+)
+NEXT_SCENE_MARKERS = (
+    "다음그래프",
+    "다음화면",
+    "다음차트",
+    "다음강의",
+    "다른그래프",
+    "다른차트",
+    "다음거",
+    "다음것으로",
+)
+PREV_SCENE_MARKERS = (
+    "이전그래프",
+    "이전화면",
+    "이전차트",
+    "이전화면으로",
+    "돌아가",
+    "뒤로",
+)
+SCENE_NUMBER_ALIASES: dict[str, SceneId] = {
+    "1": "intro",
+    "01": "intro",
+    "일번": "intro",
+    "첫번째": "intro",
+    "첫화면": "intro",
+    "2": "eigen_demo",
+    "02": "eigen_demo",
+    "이번": "eigen_demo",
+    "두번째": "eigen_demo",
+    "3": "iris_data",
+    "03": "iris_data",
+    "삼번": "iris_data",
+    "세번째": "iris_data",
+    "4": "iris_cov_eigen",
+    "04": "iris_cov_eigen",
+    "사번": "iris_cov_eigen",
+    "네번째": "iris_cov_eigen",
+    "5": "iris_pca_2d",
+    "05": "iris_pca_2d",
+    "오번": "iris_pca_2d",
+    "다섯번째": "iris_pca_2d",
+    "6": "iris_lda",
+    "06": "iris_lda",
+    "육번": "iris_lda",
+    "여섯번째": "iris_lda",
+    "7": "summary",
+    "07": "summary",
+    "칠번": "summary",
+    "일곱번째": "summary",
+    "마지막": "summary",
+}
 
 CANONICAL_SHOW_COMMANDS: dict[str, list[str]] = {
     "intro": ["PCA 보여 주세요", "PCA 다시 보여 주세요"],
@@ -79,6 +455,22 @@ CANONICAL_SHOW_COMMANDS: dict[str, list[str]] = {
     "iris_pca_2d": ["선형변환 보여 주세요", "선형변환 다시 보여 주세요"],
     "iris_lda": ["lda 보여 주세요", "lda 다시 보여 주세요"],
     "summary": ["요약 보여 주세요", "요약 다시 보여 주세요"],
+    "svd_intro": ["SVD 보여 주세요", "SVD 다시 보여 주세요"],
+    "svd_ratings": ["평점 테이블 보여 주세요", "영화 평점 보여 주세요"],
+    "svd_decompose": ["행렬분해 보여 주세요", "행렬분해 다시 보여 주세요"],
+    "svd_summary": ["SVD 요약 보여 주세요", "예측값 보여 주세요"],
+    "mf_intro": ["MF 보여 주세요", "행렬분해 모델 보여 주세요"],
+    "mf_embedding": ["임베딩 보여 주세요", "MF 임베딩 보여 주세요"],
+    "mf_ratings": ["MF 평점 테이블 보여 주세요", "MF 영화 평점 보여 주세요"],
+    "mf_model": ["MF 딥러닝 보여 주세요", "MF 딥러닝 계산 보여 주세요"],
+    "mf_training": ["딥러닝 구조도 보여 주세요", "MF 구조도 보여 주세요"],
+    "mf_summary": ["MF 요약 보여 주세요", "MF 요약정리 보여 주세요"],
+    "tf_intro": ["Transformer 보여 주세요", "트랜스포머 보여 주세요"],
+    "tf_attention": ["Query Key 보여 주세요", "QUERY KEY 보여 주세요", "쿼리 키 보여 주세요"],
+    "tf_multihead": ["Attention Value 보여 주세요", "어텐션 밸류 보여 주세요", "소프트맥스 보여 주세요"],
+    "tf_encoder": ["Embedding 보여 주세요", "임베딩 보여 주세요", "트랜스포머 임베딩 보여 주세요"],
+    "tf_diagram": ["트랜스포머 구조도 보여 주세요", "Transformer 구조도 보여 주세요"],
+    "tf_summary": ["트랜스포머 요약 보여 주세요", "Transformer 요약정리 보여 주세요"],
 }
 PHRASE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
     (("고유값", "고유벡터", "고윳값", "eigenvalue", "eigenvector"), "eigen_demo"),
@@ -95,6 +487,22 @@ PHRASE_RULES: list[tuple[tuple[str, ...], SceneId]] = [
     (("원본데이터", "원래데이터", "원래그래프", "원본산점", "원본그래프", "산점도", "분포보여"), "iris_data"),
     (("정리해", "요약해", "요약정리", "마무리", "결론"), "summary"),
     (("pca란", "pca가", "pca", "피씨에이", "주성분분석", "소개할게요", "도입", "무엇인지", "무엇인가"), "intro"),
+    (("svd란", "svd가", "svd", "에스브이디", "특이값분해", "특이값", "singular"), "svd_intro"),
+    (("평점테이블", "영화평점", "평점데이터", "영화데이터", "미관람", "추정"), "svd_ratings"),
+    (("행렬분해", "udv", "고윳값비교", "u행렬", "v행렬", "분해검증"), "svd_decompose"),
+    (("예측값", "평점예측", "예측평점", "svd요약"), "svd_summary"),
+    (("mf", "matrixfactorization", "행렬분해란", "잠재요인", "matrixfactorisation"), "mf_intro"),
+    (("임베딩", "embedding", "mf임베딩", "벡터임베딩"), "mf_embedding"),
+    (("mf평점", "mf데이터", "mf영화"), "mf_ratings"),
+    (("mf딥러닝", "딥러닝계산", "mf계산"), "mf_model"),
+    (("딥러닝구조도", "구조도", "네트워크그림"), "mf_training"),
+    (("mf요약", "mf정리"), "mf_summary"),
+    (("트랜스포머란", "transformer", "트랜스포머"), "tf_intro"),
+    (("쿼리키", "querykey", "query", "쿼리"), "tf_attention"),
+    (("어텐션", "attention", "소프트맥스", "softmax", "어텐션밸류", "attentionvalue", "attention value"), "tf_multihead"),
+    (("임베딩", "embedding", "tf임베딩", "트랜스포머임베딩"), "tf_encoder"),
+    (("트랜스포머구조도", "tf구조도"), "tf_diagram"),
+    (("트랜스포머요약", "tf요약", "tf정리"), "tf_summary"),
 ]
 
 
@@ -146,8 +554,15 @@ def _fold_pca_stt(compact: str) -> str:
     return re.sub(r"(?<![a-z])pc(?![a-z])", "pca", text)
 
 
+def _fold_lecture_stt(compact: str) -> str:
+    text = compact
+    for src, dst in sorted(STT_FOLDS, key=lambda item: len(item[0]), reverse=True):
+        text = text.replace(src, dst)
+    return _fold_pca_stt(text)
+
+
 def has_show_command(text: str) -> bool:
-    compact = _fold_pca_stt(_normalize(text))
+    compact = _fold_lecture_stt(_normalize(text))
     return any(tail in compact for tail in SHOW_TAILS)
 
 
@@ -175,7 +590,7 @@ def _close_enough(left: str, right: str) -> bool:
 def match_show_scene(text: str) -> SceneId | None:
     if not has_show_command(text):
         return None
-    compact = _fold_pca_stt(_normalize(text))
+    compact = _fold_lecture_stt(_normalize(text))
     topic = _topic_after_show(compact)
     if _wants_pca_intro(compact) or topic in {"pca", "pc"}:
         return "intro"
@@ -264,6 +679,12 @@ def route_by_keyword(text: str, current: SceneId) -> SceneId:
 
     for keywords, scene in PHRASE_RULES:
         if any(_normalize(keyword) in compact for keyword in keywords):
+            if scene == "summary" and str(current).startswith("svd_"):
+                return "svd_summary"
+            if scene == "summary" and str(current).startswith("mf_"):
+                return "mf_summary"
+            if scene == "summary" and str(current).startswith("tf_"):
+                return "tf_summary"
             return scene
 
     if any(token in compact for token in ("다른그래프", "다음그래프", "다음화면", "다른차트", "다음차트")):
@@ -287,7 +708,7 @@ def eigen_bullet_items() -> list[str]:
         "고유벡터 v: Min-Max 정규화(0~1) 후 변수에 부여되는 가중치.",
         "Min-Max: 각 변수를 (값−최소)/(최대−최소)로 변환 — 단위·범위만 맞춤.",
         "대칭 공분산 행렬의 고유벡터 v1, v2는 서로 수직.",
-        "그래프: 타원 축 길이 비율 = √(설명 비율) — v1:v2 ≈ √77.3:√22.7.",
+        "그래프: 타원 축 길이 비율 = √(정보량 비율) — v1:v2 ≈ √77.3:√22.7.",
     ]
 
 
@@ -309,11 +730,11 @@ def intro_explanation() -> str:
 
 def intro_bullet_items() -> list[str]:
     return [
-        "PCA = Principal Component Analysis · 주성분분석",
-        "목적 · 많은 변수 → 2~3개 축으로 요약(차원 축소)",
-        "고유값 λ · 각 축의 정보량(분산)",
-        "고유벡터 v · 변수 가중치(새 축의 방향)",
-        "원리 · 공분산·상관 구조에서 정보량 큰 방향을 축으로 선택",
+        "PCA(Principal Component Analysis) : 주성분분석",
+        "정보량이 2~3개 성분(축)에 몰려 있는 경향성",
+        "고유값 λ : 각 축의 정보량(분산)",
+        "고유벡터 v : 변수 가중치(새 축의 방향)",
+        "원리 : 공분산으로 고윳값(정보량)과 고유벡터(각 속성의 가중치)를 이용하여 정보량 큰 방향의 성분(축)만 선택하고, 정보량이 작은 성분은 선택하지 않는 방식으로 차원을 축소한다",
     ]
 
 
@@ -328,17 +749,61 @@ def intro_views() -> list[dict[str, Any]]:
     ]
 
 
+def svd_intro_explanation() -> str:
+    return ""
+
+
+def svd_intro_bullet_items() -> list[str]:
+    return [
+        "SVD(Singular Value Decomposition) : 특이값 분해",
+        "가로 클래스의 각 객체와 세로 클래스의 각 객체 사이의 값을 pivot table로 정리한 테이블을 분석할 때 사용",
+        "고윳값 : 가로·세로 클래스의 고윳값(정보량)은 서로 같음",
+        "확장 : 정보량이 2~3개 성분에 집중되는 PCA와 같은 경향을 바탕으로, 정보량이 적은 성분은 선택하지 않는 PCA의 확장 기법",
+    ]
+
+
+def svd_intro_footnote() -> dict[str, Any]:
+    return {
+        "title": "분해와 내적 표현",
+        "formula": {
+            "symbol": "A",
+            "expression": "U @ D @ Vᵀ",
+            "note": "U : 가로 클래스 벡터, D : 고윳값 대각행렬, V : 세로 클래스 벡터",
+        },
+        "extraFormulas": [
+            {
+                "symbol": "A",
+                "expression": "U @ √D @ √D @ Vᵀ",
+                "note": "두 클래스의 내적으로 표현",
+            }
+        ],
+        "steps": [],
+    }
+
+
+def svd_intro_views() -> list[dict[str, Any]]:
+    return [
+        {
+            "type": "bullets",
+            "title": "SVD(특이값분해)란",
+            "variant": "intro",
+            "items": svd_intro_bullet_items(),
+            "footnote": svd_intro_footnote(),
+        }
+    ]
+
+
 def summary_explanation() -> str:
     return ""
 
 
 def summary_bullet_items() -> list[str]:
     return [
-        "PCA · 분산(정보량)이 큰 축으로 4차원 → 2차원  Y = A @ W",
-        "LDA · 라벨 평균은 멀게(S_B), 같은 라벨 안 분산은 작게(S_W)",
-        "가중치 · 고유벡터의 각 성분이 해당 변수가 새 축에 기여하는 정도",
-        "점 · 관측치를 PC1·PC2 좌표로 옮긴 위치",
-        "화살표 · 변수마다 (PC1 가중치, PC2 가중치) 두 값으로 그림 — v1·v2의 해당 행",
+        "PCA : 분산(정보량)이 큰 축으로 4차원 → 2차원  Y = A @ W",
+        "LDA : 라벨 평균은 멀게(S_B), 같은 라벨 안 분산은 작게(S_W)",
+        "가중치 : 고유벡터의 각 성분 = 해당 변수가 새 축에 기여하는 정도",
+        "점 : 관측치를 PC1·PC2 좌표로 옮긴 위치",
+        "화살표 : 변수마다 (PC1 가중치, PC2 가중치) 두 값으로 그림 — W의 해당 행 (w₁, w₂)",
     ]
 
 
@@ -351,7 +816,8 @@ def summary_views() -> list[dict[str, Any]]:
             "items": summary_bullet_items(),
         },
         {"type": "iris_biplot"},
-        {"type": "iris_biplot_explain"},
+        {"type": "iris_biplot_eigen"},
+        {"type": "iris_biplot_length"},
     ]
 
 
@@ -369,6 +835,22 @@ def fallback_explanation(scene: SceneId, pca: dict[str, Any] | None) -> str:
         "iris_pca_2d": iris_pca_2d_explanation(),
         "iris_lda": iris_lda_explanation(),
         "summary": summary_explanation(),
+        "svd_intro": svd_intro_explanation(),
+        "svd_ratings": svd_ratings_explanation(),
+        "svd_decompose": svd_decompose_explanation(),
+        "svd_summary": svd_summary_explanation(),
+        "mf_intro": mf_intro_explanation(),
+        "mf_embedding": mf_embedding_explanation(),
+        "mf_ratings": mf_ratings_explanation(),
+        "mf_model": mf_model_explanation(),
+        "mf_training": mf_training_explanation(),
+        "mf_summary": mf_summary_explanation(),
+        "tf_intro": tf_intro_explanation(),
+        "tf_attention": tf_attention_explanation(),
+        "tf_multihead": tf_multihead_explanation(),
+        "tf_encoder": tf_encoder_explanation(),
+        "tf_diagram": tf_diagram_explanation(),
+        "tf_summary": tf_summary_explanation(),
     }
     return scripts[scene]
 
@@ -387,7 +869,7 @@ def views_from_scene(
 ) -> list[dict[str, Any]]:
     views: list[dict[str, Any]] = []
     for item in [scene, *extra_scenes]:
-        if item in {"intro", "live"}:
+        if item in {"intro", "live", "svd_intro", "mf_intro", "tf_intro"}:
             continue
         if item == "summary":
             views.extend(summary_views())
@@ -406,6 +888,45 @@ def views_from_scene(
             continue
         if item == "iris_lda":
             views.extend(iris_lda_views())
+            continue
+        if item == "svd_ratings":
+            views.extend(svd_ratings_views())
+            continue
+        if item == "svd_decompose":
+            views.extend(svd_decompose_views())
+            continue
+        if item == "svd_summary":
+            views.extend(svd_summary_views())
+            continue
+        if item == "mf_embedding":
+            views.extend(mf_embedding_views())
+            continue
+        if item == "mf_ratings":
+            views.extend(mf_ratings_views())
+            continue
+        if item == "mf_model":
+            views.extend(mf_model_views())
+            continue
+        if item == "mf_training":
+            views.extend(mf_training_views())
+            continue
+        if item == "mf_summary":
+            views.extend(mf_summary_views())
+            continue
+        if item == "tf_attention":
+            views.extend(tf_attention_views())
+            continue
+        if item == "tf_multihead":
+            views.extend(tf_multihead_views())
+            continue
+        if item == "tf_encoder":
+            views.extend(tf_encoder_views())
+            continue
+        if item == "tf_diagram":
+            views.extend(tf_diagram_views())
+            continue
+        if item == "tf_summary":
+            views.extend(tf_summary_views())
             continue
         else:
             views.append({"type": item})
@@ -441,7 +962,7 @@ def interpret_without_openai(
     compact = _normalize(text)
     shown = match_show_scene(text)
 
-    direct = match_scene_id(text)
+    direct = match_scene_id(text) or match_direct_scene(text)
     if forced_scene:
         scene: SceneId = forced_scene
         if forced_scene == "eigen_demo":
@@ -462,6 +983,13 @@ def interpret_without_openai(
             dataset = "iris"
     else:
         scene = current
+
+    if scene == "summary" and str(current).startswith("svd_"):
+        scene = "svd_summary"
+    if scene == "summary" and str(current).startswith("mf_"):
+        scene = "mf_summary"
+    if scene == "summary" and str(current).startswith("tf_"):
+        scene = "tf_summary"
 
     if scene == "iris_data" and dataset is None:
         dataset = "iris"
@@ -494,7 +1022,11 @@ def interpret_without_openai(
         explanation = iris_lda_explanation()
     if scene == "summary":
         explanation = summary_explanation()
-    title = "요약정리" if scene == "summary" else None
+    if scene == "svd_summary":
+        explanation = svd_summary_explanation()
+    if scene == "mf_summary":
+        explanation = mf_summary_explanation()
+    title = "요약정리" if scene in {"summary", "svd_summary", "mf_summary", "tf_summary"} else None
     views = views_from_scene(scene, extra_scenes, x_col, y_col)
     if color and views:
         views = [{**view, "color": color} if view.get("type") == "scatter" else view for view in views]
@@ -530,6 +1062,38 @@ def interpret_without_openai(
             views = iris_lda_views()
         elif scene == "summary":
             views = summary_views()
+        elif scene == "svd_intro":
+            views = svd_intro_views()
+        elif scene == "svd_ratings":
+            views = svd_ratings_views()
+        elif scene == "svd_decompose":
+            views = svd_decompose_views()
+        elif scene == "svd_summary":
+            views = svd_summary_views()
+        elif scene == "mf_intro":
+            views = mf_intro_views()
+        elif scene == "mf_embedding":
+            views = mf_embedding_views()
+        elif scene == "mf_ratings":
+            views = mf_ratings_views()
+        elif scene == "mf_model":
+            views = mf_model_views()
+        elif scene == "mf_training":
+            views = mf_training_views()
+        elif scene == "mf_summary":
+            views = mf_summary_views()
+        elif scene == "tf_intro":
+            views = tf_intro_views()
+        elif scene == "tf_attention":
+            views = tf_attention_views()
+        elif scene == "tf_multihead":
+            views = tf_multihead_views()
+        elif scene == "tf_encoder":
+            views = tf_encoder_views()
+        elif scene == "tf_diagram":
+            views = tf_diagram_views()
+        elif scene == "tf_summary":
+            views = tf_summary_views()
         else:
             views = [{"type": "bullets", "title": title or SCENE_META[scene]["title"], "items": [explanation]}]
     return AgentDecision(
@@ -561,7 +1125,23 @@ VIEW_TYPES = {
     "iris_lda_scatter",
     "iris_lda_weights",
     "iris_biplot",
+    "iris_biplot_eigen",
+    "iris_biplot_length",
     "iris_biplot_explain",
+    "svd_ratings_table",
+    "mf_ratings_table",
+    "tf_ratings_table",
+    "tf_query_key",
+    "tf_softmax_formula",
+    "tf_attention_calc",
+    "tf_customer_embedding",
+    "tf_value_weight",
+    "tf_value_embedding",
+    "tf_network",
+    "mf_ratings_embeddings",
+    "mf_dl_dot",
+    "mf_network",
+    "svd_decompose",
 }
 
 
@@ -596,6 +1176,54 @@ def _parse_views(raw: object, columns: list[str], all_columns: list[str]) -> lis
     return views
 
 
+def classify_lecture_intent(text: str, current: SceneId) -> dict[str, Any]:
+    client = OpenAI(api_key=OPENAI_API_KEY, timeout=8.0)
+    response = client.chat.completions.create(
+        model=OPENAI_MODEL,
+        temperature=0,
+        response_format={"type": "json_object"},
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "당신은 강의 음성/입력을 걸러내는 분류기입니다. JSON만 반환합니다.\n"
+                    "키: intent, scene, explanation\n"
+                    "intent 값:\n"
+                    "- show_scene: 01~07 강의 화면을 보여 달라는 명령. "
+                    "오인식(피씨에이, 보여주세여, 보여줘, 띄워줘)도 명령으로 봅니다.\n"
+                    "- question: 지금 화면에 대한 질문/설명 요청. 화면을 바꾸면 안 됩니다.\n"
+                    "- ignore: 강의와 무관하거나, 잘린 말, 잡음, 명령이 아님.\n"
+                    "scene:\n"
+                    "- show_scene일 때만 intro, eigen_demo, iris_data, iris_cov_eigen, "
+                    "iris_pca_2d, iris_lda, summary 중 하나.\n"
+                    "- question, ignore 는 null.\n"
+                    "- 'PCA/주성분분석 보여 주세요' 는 intro. "
+                    "iris_pca_2d 는 선형변환·4차원→2차원일 때만.\n"
+                    "explanation:\n"
+                    "- question일 때만 강의 설명 2~4문장.\n"
+                    "- show_scene, ignore 는 빈 문자열.\n"
+                    f"현재 화면: {current}\n"
+                    f"대표 명령: {json.dumps(CANONICAL_SHOW_COMMANDS, ensure_ascii=False)}"
+                ),
+            },
+            {
+                "role": "user",
+                "content": json.dumps({"utterance": text, "current_scene": current}, ensure_ascii=False),
+            },
+        ],
+    )
+    content = response.choices[0].message.content or "{}"
+    payload = json.loads(content)
+    intent = str(payload.get("intent") or "ignore").strip().lower()
+    if intent not in {"show_scene", "question", "ignore"}:
+        intent = "ignore"
+    scene = str(payload.get("scene") or "").strip()
+    if scene not in SCENE_ORDER:
+        scene = ""
+    explanation = str(payload.get("explanation") or "").strip()
+    return {"intent": intent, "scene": scene or None, "explanation": explanation}
+
+
 def interpret_utterance(
     text: str,
     current: SceneId,
@@ -606,72 +1234,23 @@ def interpret_utterance(
     categoricals: list[str] | None = None,
     preview: list[dict[str, Any]] | None = None,
 ) -> AgentDecision:
+    _ = source_name, categoricals, preview
     names = all_columns or columns
     if not openai_enabled():
-        return interpret_without_openai(text, current, pca, columns)
-
-    summary = {
-        "current_scene": current,
-        "current_dataset": source_name,
-        "canonical_show_commands": CANONICAL_SHOW_COMMANDS,
-        "builtin_datasets": {
-            "iris": ["번호", "꽃받침길이", "꽃받침너비", "꽃잎길이", "꽃잎너비", "품종"],
-            "sample": ["학생", "수학", "영어", "과학", "공부시간", "수면시간", "과제횟수"],
-        },
-        "numeric_columns": columns,
-        "all_columns": names,
-        "categorical_columns": categoricals or [],
-        "preview": preview or [],
-        "pca": _pca_brief(pca),
-    }
-    client = OpenAI(api_key=OPENAI_API_KEY)
-    response = client.chat.completions.create(
-        model=OPENAI_MODEL,
-        temperature=0.2,
-        response_format={"type": "json_object"},
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "당신은 실시간 강의 화면입니다.\n"
-                    "항상 JSON만 반환합니다. 키: title, explanation, hint, dataset, scene, views.\n"
-                    "canonical_show_commands 는 01~07 화면을 여는 대표 문장입니다.\n"
-                    "장면 전환은 반드시 '보여 주세요' 또는 '다시 보여 주세요'가 들어 있을 때만 합니다. "
-                    "그 말이 없으면 scene은 반드시 current_scene 을 유지하세요. "
-                    "'보여줘', '띄워줘', '다시 보자'만으로는 전환하지 마세요.\n"
-                    "보여 주세요가 있을 때, 주제가 대표 문장과 비슷하면 해당 scene id를 넣으세요.\n"
-                    "중요: 'PCA 보여 주세요' 는 반드시 intro 입니다. "
-                    "iris_pca_2d 는 '선형변환 보여 주세요'일 때만입니다. PCA라는 단어만 있으면 05로 보내지 마세요.\n"
-                    "질문·설명만 하면 scene은 current_scene 을 유지하세요.\n"
-                    "title: 짧은 화면 제목.\n"
-                    "explanation: 강사가 방금 말한 내용에 대한 강의 설명 2~5문장.\n"
-                    "hint: 다음에 말하면 좋은 한 줄.\n"
-                    "dataset: iris, sample, 또는 null.\n"
-                    "scene: intro, eigen_demo, iris_data, iris_cov_eigen, iris_pca_2d, iris_lda, summary, live 중 하나.\n"
-                    "views: 화면 블록 0~4개. 좌표 배열은 만들지 마세요. 열 이름은 제공된 이름만 쓰세요.\n"
-                    "views.type: scatter, histogram, bar, heatmap, table, bullets, iris_biplot\n"
-                ),
-            },
-            {
-                "role": "user",
-                "content": json.dumps(
-                    {"utterance": text, "context": summary},
-                    ensure_ascii=False,
-                ),
-            },
-        ],
-    )
-    content = response.choices[0].message.content or "{}"
-    try:
-        payload = json.loads(content)
-    except json.JSONDecodeError:
         return interpret_without_openai(text, current, pca, columns, all_columns=names)
 
-    requested = str(payload.get("scene") or "").strip()
-    compact = _fold_pca_stt(_normalize(text))
+    try:
+        classified = classify_lecture_intent(text, current)
+    except (json.JSONDecodeError, Exception):
+        return interpret_without_openai(text, current, pca, columns, all_columns=names)
+
+    intent = classified["intent"]
+    requested = classified["scene"]
+    compact = _fold_lecture_stt(_normalize(text))
     if requested == "iris_pca_2d" and _wants_pca_intro(compact):
         requested = "intro"
-    if requested in SCENE_ORDER and requested != current:
+
+    if intent == "show_scene" and requested in SCENE_ORDER:
         return interpret_without_openai(
             text,
             current,
@@ -680,53 +1259,18 @@ def interpret_utterance(
             all_columns=names,
             forced_scene=requested,  # type: ignore[arg-type]
         )
-    if current in SCENE_ORDER:
-        locked = interpret_without_openai(
-            text,
-            current,
-            pca,
-            columns,
-            all_columns=names,
-            forced_scene=current,
-        )
-        explanation = str(payload.get("explanation") or "").strip()
+
+    locked = interpret_without_openai(
+        text,
+        current,
+        pca,
+        columns,
+        all_columns=names,
+        forced_scene=current,
+    )
+    if intent == "question":
+        explanation = classified["explanation"]
         if explanation:
             locked.explanation = explanation
-        hint = str(payload.get("hint") or "").strip() or None
-        if hint:
-            locked.hint = hint
-        title = str(payload.get("title") or "").strip() or None
-        if title:
-            locked.title = title
-        return locked
-
-    scene = _scene_from_value(requested or "live", "live")
-    explanation = str(payload.get("explanation") or "").strip()
-    if not explanation:
-        explanation = fallback_explanation(scene, pca)
-    title = str(payload.get("title") or "").strip() or None
-    hint = str(payload.get("hint") or "").strip() or None
-    x_column = resolve_column(payload.get("x_column") or payload.get("x"), columns)
-    y_column = resolve_column(payload.get("y_column") or payload.get("y"), columns)
-    extra_scenes: list[SceneId] = []
-    dataset_value = str(payload.get("dataset") or "").strip().lower()
-    dataset: DatasetName | None = dataset_value if dataset_value in {"iris", "sample"} else None
-    dataset = detect_dataset(text) or dataset
-    views = _parse_views(payload.get("views"), columns, names)
-    if not views:
-        views = views_from_scene(scene, extra_scenes, x_column, y_column)
-    if not views:
-        views = [{"type": "bullets", "title": title or "핵심", "items": [explanation]}]
-        scene = "live"
-    return AgentDecision(
-        scene=scene,
-        explanation=explanation,
-        title=title,
-        hint=hint,
-        x_column=x_column,
-        y_column=y_column,
-        dataset=dataset,
-        extra_scenes=extra_scenes,
-        views=views,
-    )
+    return locked
 

@@ -232,8 +232,8 @@ def make_eigen_table_chart(df: pd.DataFrame) -> dict[str, Any]:
     evals, evecs = data["evals"], data["evecs"]
     total = float(evals.sum()) or 1.0
     rows = [
-        ["고유값 λ", round(float(evals[0]), 4), round(float(evals[1]), 4)],
-        ["설명 비율 (%)", round(float(evals[0] / total) * 100, 1), round(float(evals[1] / total) * 100, 1)],
+        ["고윳값 λ(정보량)", round(float(evals[0]), 4), round(float(evals[1]), 4)],
+        ["정보량 비율 (%)", round(float(evals[0] / total) * 100, 1), round(float(evals[1] / total) * 100, 1)],
         [f"{HEIGHT_COL} 가중치", round(float(evecs[0, 0]), 3), round(float(evecs[0, 1]), 3)],
         [f"{WEIGHT_COL} 가중치", round(float(evecs[1, 0]), 3), round(float(evecs[1, 1]), 3)],
     ]
@@ -241,7 +241,7 @@ def make_eigen_table_chart(df: pd.DataFrame) -> dict[str, Any]:
     return {
         "type": "table",
         "title": "Min-Max 정규화 기준 고유값 · 고유벡터",
-        "columns": ["항목", "v1 (1번째 축)", "v2 (2번째 축)"],
+        "columns": ["항목", "v1 (성분 1축)", "v2 (성분 2축)"],
         "rows": rows,
         "footnote": {
             "title": "Min-Max 정규화",
@@ -254,7 +254,7 @@ def make_eigen_table_chart(df: pd.DataFrame) -> dict[str, Any]:
                 "키(cm), 몸무게(kg) 각 변수 x에 위 식을 적용 → 0 ≤ z ≤ 1",
                 "z에서 변수별 평균을 빼 중심화",
                 "공분산 행렬의 고유값 λ, 고유벡터 v 계산",
-                "단위·범위만 맞춤 — 상관 구조와 설명 비율은 유지",
+                "단위·범위만 맞춤 — 상관 구조와 정보량 비율은 유지",
             ],
         },
     }

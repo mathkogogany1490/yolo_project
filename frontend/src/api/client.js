@@ -1,6 +1,6 @@
 /**
  * API base URL
- * - default: http://127.0.0.1:8000
+ * - default: http://127.0.0.1:8002
  * - override: VITE_API_URL
  */
 export const API_BASE_URL =

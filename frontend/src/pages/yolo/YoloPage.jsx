@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
     YoloAnnotationCanvas,
     YoloAnnotationList,
@@ -7,8 +8,9 @@ import {
     YoloLabelPicker,
     YoloStepTabs,
     YoloTrainPanel,
+    YoloVideoPredict,
 } from '../../components/yolo';
-import { ErrorText, Hint, PanelSection } from '../../components/yolo/shared.styles';
+import { ErrorText, PanelSection } from '../../components/yolo/shared.styles';
 import { RowButton } from '../../components/yolo/RowButton';
 import {
     useCreateYoloAnnotationMutation,
@@ -21,9 +23,12 @@ import {
     useYoloAnnotationsQuery,
     useYoloLabelsQuery,
 } from '../../query/yolo';
-import { Description, GlassPanel, PageRoot, Title } from './YoloPage.styles';
+import { GlassPanel, PageRoot } from './YoloPage.styles';
 
 export function YoloPage() {
+    const [searchParams] = useSearchParams();
+    const scene = searchParams.get('scene') || 'detect-train';
+
     const [step, setStep] = useState(1);
     const [sessionId, setSessionId] = useState('');
     const [frames, setFrames] = useState([]);
@@ -35,7 +40,6 @@ export function YoloPage() {
     const [editingAnnotationId, setEditingAnnotationId] = useState(null);
     const [selectedAnnotationId, setSelectedAnnotationId] = useState(null);
     const [epochs, setEpochs] = useState(10);
-    const [device, setDevice] = useState('auto');
     const [trainResult, setTrainResult] = useState(null);
     const [localError, setLocalError] = useState('');
     const [registerError, setRegisterError] = useState('');
@@ -60,11 +64,19 @@ export function YoloPage() {
         return label ? { label_id: label.id } : { name: activeLabelName };
     };
 
+    if (scene === 'predict') {
+        return (
+            <PageRoot>
+                <GlassPanel>
+                    <YoloVideoPredict />
+                </GlassPanel>
+            </PageRoot>
+        );
+    }
+
     return (
         <PageRoot>
             <GlassPanel>
-                <Title>YOLO 탐지 학습</Title>
-                <Description>① 추출 → ② 라벨링 → ③ 훈련 (이 페이지 버튼으로 학습)</Description>
                 <YoloStepTabs step={step} onStepChange={setStep} />
 
                 {step === 1 && (
@@ -177,7 +189,6 @@ export function YoloPage() {
                                         });
                                     }}
                                 />
-                                <Hint>드래그로 박스 삽입. 목록에서 수정·삭제.</Hint>
                                 {localError && <ErrorText>{localError}</ErrorText>}
                                 <YoloAnnotationList
                                     annotations={annotations}
@@ -215,11 +226,8 @@ export function YoloPage() {
 
                 {step === 3 && (
                     <YoloTrainPanel
-                        sessionId={sessionId}
                         epochs={epochs}
                         onEpochsChange={setEpochs}
-                        device={device}
-                        onDeviceChange={setDevice}
                         isPending={trainMutation.isPending}
                         error={trainMutation.isError ? trainMutation.error.message : null}
                         result={trainResult}
@@ -228,7 +236,7 @@ export function YoloPage() {
                                 {
                                     session_ids: sessionId ? [sessionId] : undefined,
                                     epochs: Number(epochs) || 10,
-                                    device,
+                                    device: 'auto',
                                 },
                                 { onSuccess: setTrainResult },
                             )

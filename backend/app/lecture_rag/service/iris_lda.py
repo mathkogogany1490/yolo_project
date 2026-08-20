@@ -70,9 +70,6 @@ def iris_lda_bullet_items() -> list[str]:
     return [
         "PCA 한계 · 분산이 큰 축만 고르면 품종이 기울어져 겹쳐 보임",
         "LDA 목표 · 품종(라벨)끼리는 멀게, 같은 품종끼리는 뭉치게",
-        "S_B · 각 라벨 평균을 서로 멀게 하는 항 (between, 클래스 간)",
-        "S_W · 각 라벨 안 분산의 합을 작게 하는 항 (within, 클래스 내)",
-        "식 · J(w) = (wᵀ S_B w) / (wᵀ S_W w)  →  Y = A @ W 로 2차원 변환",
     ]
 
 
@@ -144,26 +141,25 @@ def make_iris_lda_weight_table(df: pd.DataFrame) -> dict[str, Any]:
     columns = ["항목", *[f"w{i + 1} (LD{i + 1})" for i in range(n_ld)]]
     rows: list[list[Any]] = [
         ["Fisher λ", *[round(float(v), 4) for v in evals]],
-        ["설명 비율 (%)", *ratios],
+        ["정보 비율 (%)", *ratios],
     ]
     for i, feature in enumerate(features):
         rows.append([f"{feature} 가중치", *[round(float(weights[i, j]), 3) for j in range(n_ld)]])
 
     return {
         "type": "table",
-        "title": "Fisher 가중치 행렬 W = [w1 w2]",
+        "title": "",
         "columns": columns,
         "rows": rows,
         "footnote": {
-            "title": "평균은 멀게 · 분산은 작게",
+            "title": "평균은 멀게 · 분산은 작게 (Fisher 정리)",
             "formula": {
-                "symbol": "J(w)",
-                "numerator": "wᵀ S_B w  (평균 거리)",
-                "denominator": "wᵀ S_W w  (라벨 안 분산)",
+                "symbol": "S_W⁻¹ S_B w",
+                "expression": "W",
             },
             "steps": [
-                "S_B : 세토사·버시컬러·버지니카 평균이 서로 멀어지도록",
-                "S_W : 같은 품종 안 점들이 퍼진 정도(분산)의 합을 줄이도록",
+                "S_W : 각 클래스의 분산의 합의 공분산",
+                "S_B : 각 클래스의 평균의 공분산",
                 f"W = [w1 w2],  Y = A @ W → {n_rows}×2  (LD1, LD2)",
             ],
         },

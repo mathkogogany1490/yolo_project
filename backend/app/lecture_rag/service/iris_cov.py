@@ -43,28 +43,12 @@ def _iris_minmax_cov_eigen(df: pd.DataFrame) -> dict[str, Any] | None:
     }
 
 
-def iris_cov_eigen_bullet_items() -> list[str]:
-    return [
-        "Min-Max · z = (x − min) / (max − min) → 각 변수를 0~1로 맞춤",
-        "A 행렬 · Min-Max 후 변수별 평균을 뺀 150×4 행렬",
-        "공분산 · Σ = (1/(n−1)) × Aᵀ @ A  — 표를 행렬로 바꿔 행렬곱으로 계산",
-        "고유값 λ · 각 주성분 축이 설명하는 정보량(분산)",
-        "고유벡터 v · 각 변수에 부여되는 가중치(새 축의 방향)",
-    ]
-
-
 def iris_cov_eigen_explanation() -> str:
     return ""
 
 
 def iris_cov_eigen_views() -> list[dict[str, Any]]:
     return [
-        {
-            "type": "bullets",
-            "title": "Min-Max · 공분산 · 고유값",
-            "variant": "iris",
-            "items": iris_cov_eigen_bullet_items(),
-        },
         {"type": "iris_cov_heatmap"},
         {"type": "iris_eigen_table"},
     ]
@@ -116,10 +100,10 @@ def make_iris_eigen_table_chart(df: pd.DataFrame) -> dict[str, Any]:
     ratios = data["explained_ratio_percent"]
     n_pc = len(features)
 
-    columns = ["항목", *[f"v{i + 1}" for i in range(n_pc)]]
+    columns = ["항목", *[f"v{i + 1} (성분 {i + 1}축)" for i in range(n_pc)]]
     rows: list[list[Any]] = [
-        ["고유값 λ", *[round(float(v), 4) for v in evals]],
-        ["설명 비율 (%)", *ratios],
+        ["고유값 λ(정보량)", *[round(float(v), 4) for v in evals]],
+        ["정보량 비율 (%)", *ratios],
     ]
     for i, feature in enumerate(features):
         rows.append([f"{feature} 가중치", *[round(float(evecs[i, j]), 3) for j in range(n_pc)]])
@@ -137,21 +121,11 @@ def make_iris_eigen_table_chart(df: pd.DataFrame) -> dict[str, Any]:
                 "denominator": "분산",
             },
             "steps": [
-                "고유값 λ가 클수록 그 축이 데이터 변동을 많이 설명",
+                "고유값 λ가 클수록 그 성분 축에 정보량이 큼",
                 "고유벡터 v의 각 성분 = 해당 변수의 가중치",
-                "v₁ 방향 = 1번째 주성분(PC1), v₂ = PC2 …",
             ],
         },
     }
-
-
-def iris_pca_2d_bullet_items() -> list[str]:
-    return [
-        "정보량이 큰 두 축 · λ1, λ2에 대응하는 고유벡터 v1, v2를 가중치로 사용",
-        "가중치 행렬 W · W = [v1 v2]  →  4×2 행렬",
-        "선형변환 · Y = A @ W  — 150×4 원본(정규화·중심화)을 150×2로 축소",
-        "산점도 · 가로 PC1 = A·v1, 세로 PC2 = A·v2  (품종별 색)",
-    ]
 
 
 def iris_pca_2d_explanation() -> str:
@@ -160,12 +134,6 @@ def iris_pca_2d_explanation() -> str:
 
 def iris_pca_2d_views() -> list[dict[str, Any]]:
     return [
-        {
-            "type": "bullets",
-            "title": "4차원 → 2차원 선형변환",
-            "variant": "iris",
-            "items": iris_pca_2d_bullet_items(),
-        },
         {"type": "iris_pca_scatter"},
         {"type": "iris_pca_weights"},
     ]
@@ -219,8 +187,8 @@ def make_iris_pca_weight_table(df: pd.DataFrame) -> dict[str, Any]:
     n_rows = data["n_rows"]
 
     rows: list[list[Any]] = [
-        ["고유값 λ", round(float(evals[0]), 4), round(float(evals[1]), 4)],
-        ["설명 비율 (%)", ratios[0], ratios[1]],
+        ["고유값 λ(정보량)", round(float(evals[0]), 4), round(float(evals[1]), 4)],
+        ["정보량 비율 (%)", ratios[0], ratios[1]],
     ]
     for i, feature in enumerate(features):
         rows.append([f"{feature} 가중치", round(float(evecs[i, 0]), 3), round(float(evecs[i, 1]), 3)])
@@ -240,7 +208,6 @@ def make_iris_pca_weight_table(df: pd.DataFrame) -> dict[str, Any]:
             "steps": [
                 f"A : Min-Max·중심화한 {n_rows}×4 행렬 (송이 × 변수 4개)",
                 "W = [v1 v2] : 정보량이 큰 두 고유벡터 (4×2)",
-                f"행렬곱 규칙 · (m×k) @ (k×n) = (m×n) 이므로 Y는 {n_rows}×2 (가로 PC1, 세로 PC2)",
             ],
         },
     }
@@ -294,7 +261,29 @@ def make_iris_biplot_chart(df: pd.DataFrame) -> dict[str, Any]:
     }
 
 
-def make_iris_biplot_explain_table(df: pd.DataFrame) -> dict[str, Any]:
+def make_iris_biplot_eigen_table(df: pd.DataFrame) -> dict[str, Any]:
+    data = _iris_minmax_cov_eigen(df)
+    if data is None:
+        return {"type": "none"}
+
+    features = data["features"]
+    evecs = data["evecs"]
+    n_pc = len(features)
+
+    columns = ["항목", *[f"v{i + 1} (성분 {i + 1}축)" for i in range(n_pc)]]
+    rows: list[list[Any]] = []
+    for i, feature in enumerate(features):
+        rows.append([f"{feature} 가중치", *[round(float(evecs[i, j]), 3) for j in range(n_pc)]])
+
+    return {
+        "type": "table",
+        "title": "고유벡터(가중치)",
+        "columns": columns,
+        "rows": rows,
+    }
+
+
+def make_iris_biplot_length_table(df: pd.DataFrame) -> dict[str, Any]:
     data = _iris_minmax_cov_eigen(df)
     if data is None:
         return {"type": "none"}
@@ -307,36 +296,13 @@ def make_iris_biplot_explain_table(df: pd.DataFrame) -> dict[str, Any]:
         length = float(np.hypot(w1, w2))
         rows.append([feature, round(w1, 3), round(w2, 3), round(length, 3)])
 
-    n_rows = data["n_rows"]
     return {
         "type": "table",
-        "title": "그래프를 그리는 방법",
+        "title": "각 독립변수의 길이",
         "columns": ["변수", "w₁ (PC1)", "w₂ (PC2)", "길이"],
         "rows": rows,
-        "footnote": {
-            "title": "점과 화살표를 같은 PC1·PC2 평면에 겹칩니다",
-            "formula": {
-                "symbol": "Y",
-                "expression": "A @ W",
-                "note": (
-                    f"({n_rows}×4) @ (4×2) → {n_rows}×2  · "
-                    "150송이 × PC 두 축. 150×2로 나누지 않음"
-                ),
-            },
-            "extraFormulas": [
-                {
-                    "symbol": "길이",
-                    "radicand": "w1^2 + w2^2",
-                }
-            ],
-            "steps": [
-                (
-                    f"점 · Y = A @ W. A는 {n_rows}×4, W는 4×2이므로 결과는 {n_rows}×2 "
-                    "(가로 PC1, 세로 PC2, 품종별 색). 분수처럼 보이는 150×2는 나눗셈이 아니라 행렬 크기"
-                ),
-                "화살표 · 변수마다 W의 한 행 (w₁, w₂)을 원점에서 그림. 한 고유벡터의 앞 두 값이 아님",
-                "스케일 · 화살표가 점과 같은 축에 보이게 (w₁, w₂) × 0.85 × max|Y| / max|W|",
-                "길이(위 식)가 클수록 그 변수가 PC1·PC2에 기여가 큼. 화살표 쪽 점은 그 변수가 큰 관측치",
-            ],
-        },
     }
+
+
+def make_iris_biplot_explain_table(df: pd.DataFrame) -> dict[str, Any]:
+    return make_iris_biplot_length_table(df)

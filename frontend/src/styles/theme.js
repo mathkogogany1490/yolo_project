@@ -54,6 +54,11 @@ export const theme = {
 
     space: {
         page: '32px',
+        layoutGap: '16px',
+    },
+
+    layout: {
+        sidebarWidth: 'clamp(200px, 16vw, 240px)',
     },
 
     shadow: {

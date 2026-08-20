@@ -1,11 +1,9 @@
 import styled from 'styled-components';
-import { FormButton } from '../../auth/AuthForm.styles';
 
-export const PickerRoot = styled.div`
+export const ExtractRoot = styled.section`
   display: flex;
   flex-direction: column;
   gap: 16px;
-  align-items: stretch;
 `;
 
 export const DropZone = styled.div`
@@ -15,8 +13,8 @@ export const DropZone = styled.div`
   align-items: center;
   justify-content: center;
   gap: 12px;
-  min-height: ${({ $hasPreview }) => ($hasPreview ? '280px' : '220px')};
-  padding: ${({ $hasPreview }) => ($hasPreview ? '12px' : '28px 20px')};
+  min-height: 220px;
+  padding: 28px 20px;
   border-radius: ${({ theme }) => theme.radius.lg};
   border: 2px dashed
     ${({ theme, $dragging }) =>
@@ -26,18 +24,19 @@ export const DropZone = styled.div`
   backdrop-filter: blur(${({ theme }) => theme.blur.input});
   -webkit-backdrop-filter: blur(${({ theme }) => theme.blur.input});
   color: ${({ theme }) => theme.colors.text};
-  cursor: pointer;
+  cursor: ${({ $disabled }) => ($disabled ? 'wait' : 'pointer')};
+  opacity: ${({ $disabled }) => ($disabled ? 0.7 : 1)};
   transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
   box-shadow: ${({ $dragging, theme }) =>
         $dragging ? `0 0 0 4px ${theme.colors.accentBg}` : 'none'};
-  overflow: hidden;
 
   &:hover {
-    border-color: ${({ theme }) => theme.colors.accent};
+    border-color: ${({ theme, $disabled }) =>
+        $disabled ? theme.colors.glassBorder : theme.colors.accent};
   }
 `;
 
-export const FileInput = styled.input`
+export const HiddenFile = styled.input`
   display: none;
 `;
 
@@ -55,22 +54,6 @@ export const DropHint = styled.span`
   text-align: center;
 `;
 
-export const PreviewWrap = styled.div`
-  width: 100%;
-  height: 100%;
-  min-height: 256px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-export const Preview = styled.img`
-  max-width: 100%;
-  max-height: 320px;
-  object-fit: contain;
-  border-radius: ${({ theme }) => theme.radius.md};
-`;
-
 export const FileName = styled.p`
   margin: 0;
   font-size: 13px;
@@ -78,8 +61,9 @@ export const FileName = styled.p`
   word-break: break-all;
 `;
 
-export const AnalyzeButton = styled(FormButton)`
-  width: fit-content;
-  min-width: 140px;
-  align-self: flex-start;
+export const FrameCountRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
 `;

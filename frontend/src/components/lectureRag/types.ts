@@ -6,7 +6,23 @@ export type SceneId =
   | "iris_cov_eigen"
   | "iris_pca_2d"
   | "iris_lda"
-  | "summary";
+  | "summary"
+  | "svd_intro"
+  | "svd_ratings"
+  | "svd_decompose"
+  | "svd_summary"
+  | "mf_intro"
+  | "mf_embedding"
+  | "mf_ratings"
+  | "mf_model"
+  | "mf_training"
+  | "mf_summary"
+  | "tf_intro"
+  | "tf_attention"
+  | "tf_multihead"
+  | "tf_encoder"
+  | "tf_diagram"
+  | "tf_summary";
 
 export type SceneItem = {
   id: SceneId;
@@ -86,15 +102,136 @@ export type ChartPayload =
       columns: string[];
       rows: (string | number | null)[][];
       footnote?: string | TableFootnote;
+      highlight_cells?: [number, number][];
+      summary_rows?: number[];
     }
   | {
       type: "bullets";
       title: string;
       items: string[];
       variant?: "intro" | "compact" | "iris";
+      footnote?: string | TableFootnote;
+      extraFootnotes?: TableFootnote[];
     }
   | {
-      type: "eigen_scatter";
+      type: "matrix_pair";
+      title: string;
+      left: {
+        label: string;
+        row_labels: string[];
+        col_labels: string[];
+        diagonal?: string[];
+        is_diagonal?: boolean;
+        values?: string[][];
+      };
+      right: {
+        label: string;
+        row_labels: string[];
+        col_labels: string[];
+        diagonal?: string[];
+        is_diagonal?: boolean;
+        values?: string[][];
+      };
+      footnote?: string;
+    }
+  | {
+      type: "matrix_product";
+      title: string;
+      variant?: "verify" | "predict" | "center";
+      operators?: string[];
+      matrices: {
+        label: string;
+        row_labels?: string[];
+        col_labels?: string[];
+        values?: string[][];
+        diagonal?: string[];
+        is_diagonal?: boolean;
+        size?: number;
+      }[];
+      result: {
+        label: string;
+        row_labels: string[];
+        col_labels: string[];
+        values: string[][];
+        highlight_cells?: [number, number][];
+      };
+      footnote?: string;
+    }
+  | {
+      type: "matrix_equation";
+      title: string;
+      equation: string;
+      original: {
+        label: string;
+        row_labels: string[];
+        col_labels: string[];
+        values: string[][];
+      };
+      reconstructed: {
+        label: string;
+        row_labels: string[];
+        col_labels: string[];
+        values: string[][];
+      };
+      footnote?: string;
+    }
+  | {
+      type: "distribution_line";
+      title: string;
+      caption?: string;
+      variant: "pdf" | "cdf";
+      xLabel: string;
+      yLabel: string;
+      points: { x: number; y: number }[];
+    }
+  | {
+      type: "mf_network";
+      title: string;
+      dims: string[];
+      movie: {
+        name: string;
+        embedding: number[];
+        weights: number[];
+        weighted: number[];
+      };
+      user: {
+        name: string;
+        embedding: number[];
+        weights: number[];
+        weighted: number[];
+      };
+      terms: number[];
+      predicted: number;
+      actual: number;
+      error: number;
+      loss: number;
+      dL_dPred: number;
+      dL_dW_movie: number[];
+      dL_dW_user: number[];
+    }
+  | {
+      type: "tf_network";
+      title: string;
+      dims: string[];
+      query: {
+        name: string;
+        embedding: number[];
+        weights: number[];
+        weighted: number[];
+      };
+      keys: {
+        name: string;
+        embedding: number[];
+        weights: number[];
+        weighted: number[];
+        score: number;
+        value: number;
+        attention: number;
+        weightedValue: number;
+      }[];
+      predicted: number;
+    }
+  | {
       title: string;
       xLabel: string;
       yLabel: string;

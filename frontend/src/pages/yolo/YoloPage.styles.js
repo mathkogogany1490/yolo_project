@@ -3,11 +3,15 @@ import { glassCard } from '../../styles/glassCard';
 
 export const PageRoot = styled.div`
   flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
   background: transparent;
   padding: ${({ theme }) => theme.space.page};
   display: flex;
   flex-direction: column;
   gap: 16px;
+  box-sizing: border-box;
 `;
 
 export const GlassPanel = styled.section`

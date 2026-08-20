@@ -14,8 +14,11 @@ from .agent import (
     interpret_without_openai,
     iris_cov_eigen_views,
     iris_lda_views,
+    match_direct_scene,
+    match_scene_id,
     match_show_scene,
     summary_views,
+    svd_intro_views,
     iris_pca_2d_views,
     iris_views,
     openai_enabled,
@@ -23,6 +26,23 @@ from .agent import (
 )
 from .data import categorical_columns, load_height_weight_frame, load_iris_frame, load_sample, numeric_columns, preview_frame
 from .pca import chart_for_scene
+from .mf import (
+    mf_embedding_views,
+    mf_intro_views,
+    mf_model_views,
+    mf_ratings_views,
+    mf_summary_views,
+    mf_training_views,
+)
+from .svd import svd_ratings_views, svd_decompose_views, svd_summary_views
+from .transformer import (
+    tf_attention_views,
+    tf_diagram_views,
+    tf_encoder_views,
+    tf_intro_views,
+    tf_multihead_views,
+    tf_summary_views,
+)
 from .store import store
 from .viz import materialize_views
 
@@ -101,6 +121,38 @@ def get_lecture_state() -> TurnResponse:
             views = iris_lda_views()
         elif scene == "summary":
             views = summary_views()
+        elif scene == "svd_intro":
+            views = svd_intro_views()
+        elif scene == "svd_ratings":
+            views = svd_ratings_views()
+        elif scene == "svd_decompose":
+            views = svd_decompose_views()
+        elif scene == "svd_summary":
+            views = svd_summary_views()
+        elif scene == "mf_intro":
+            views = mf_intro_views()
+        elif scene == "mf_embedding":
+            views = mf_embedding_views()
+        elif scene == "mf_ratings":
+            views = mf_ratings_views()
+        elif scene == "mf_model":
+            views = mf_model_views()
+        elif scene == "mf_training":
+            views = mf_training_views()
+        elif scene == "mf_summary":
+            views = mf_summary_views()
+        elif scene == "tf_intro":
+            views = tf_intro_views()
+        elif scene == "tf_attention":
+            views = tf_attention_views()
+        elif scene == "tf_multihead":
+            views = tf_multihead_views()
+        elif scene == "tf_encoder":
+            views = tf_encoder_views()
+        elif scene == "tf_diagram":
+            views = tf_diagram_views()
+        elif scene == "tf_summary":
+            views = tf_summary_views()
         else:
             views = [{"type": "bullets", "title": SCENE_META[scene]["title"], "items": [explanation]}]
     return _turn_payload(
@@ -116,7 +168,8 @@ def process_turn(text: str, current_scene: SceneId | None, from_menu: bool = Fal
     names = list(store.df.columns)
     try:
         shown = match_show_scene(heard)
-        if from_menu:
+        direct = match_scene_id(heard) or match_direct_scene(heard)
+        if from_menu or direct:
             decision = interpret_without_openai(
                 heard,
                 current,

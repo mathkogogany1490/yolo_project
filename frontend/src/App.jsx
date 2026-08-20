@@ -1,7 +1,8 @@
 import { Navigate, Route, Routes, useOutletContext } from 'react-router-dom';
 import { useEffect } from 'react';
+import { AppRoot } from './App.styles';
 import { AppLayout } from './components/layout/AppLayout';
-import { pageMenus } from './pages/menu';
+import { getRouteMenus } from './pages/menu';
 
 function RequireAuth({ children }) {
     const { loggedIn, openLogin } = useOutletContext();
@@ -16,23 +17,25 @@ function RequireAuth({ children }) {
 
 function App() {
     return (
-        <Routes>
-            <Route element={<AppLayout />}>
-                {pageMenus.map((menu) => {
-                    const Page = menu.element;
-                    const element =
-                        menu.path === '/' ? (
-                            <Page />
-                        ) : (
-                            <RequireAuth>
+        <AppRoot>
+            <Routes>
+                <Route element={<AppLayout />}>
+                    {getRouteMenus().map((menu) => {
+                        const Page = menu.element;
+                        const element =
+                            menu.path === '/' ? (
                                 <Page />
-                            </RequireAuth>
-                        );
-                    return <Route key={menu.id} path={menu.path} element={element} />;
-                })}
-                <Route path="*" element={<Navigate to="/" replace />} />
-            </Route>
-        </Routes>
+                            ) : (
+                                <RequireAuth>
+                                    <Page />
+                                </RequireAuth>
+                            );
+                        return <Route key={menu.id} path={menu.path} element={element} />;
+                    })}
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Route>
+            </Routes>
+        </AppRoot>
     );
 }
 

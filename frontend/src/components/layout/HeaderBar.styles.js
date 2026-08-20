@@ -6,16 +6,23 @@ export const HeaderBar = styled.header`
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  flex-shrink: 0;
   padding: 12px 16px;
   ${glassCard('default')}
   border-radius: ${({ theme }) => theme.radius.lg};
 `;
 
-export const HeaderTitle = styled.h1`
+export const HeaderTitle = styled.a`
   margin: 0;
   font-size: 20px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textHeading};
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.85;
+  }
 `;
 
 export const HeaderActions = styled.div`

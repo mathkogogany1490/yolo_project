@@ -2,7 +2,6 @@ import { RowButton } from '../RowButton';
 import {
     ErrorText,
     FieldLabel,
-    Hint,
     PanelSection,
     Row,
     Select,
@@ -12,23 +11,15 @@ import {
 import { ResultBox } from './YoloTrainPanel.styles';
 
 const PRESET_EPOCHS = [5, 10, 20, 30, 50, 100];
-const DEVICE_OPTIONS = [
-    { value: 'auto', label: 'auto (GPU 있으면 cuda)' },
-    { value: 'cuda', label: 'cuda (GPU)' },
-    { value: 'cpu', label: 'cpu' },
-];
 
 export function YoloTrainPanel({
-                                   sessionId = '',
-                                   epochs,
-                                   onEpochsChange,
-                                   device = 'auto',
-                                   onDeviceChange,
-                                   isPending = false,
-                                   error = null,
-                                   result = null,
-                                   onTrain,
-                               }) {
+    epochs,
+    onEpochsChange,
+    isPending = false,
+    error = null,
+    result = null,
+    onTrain,
+}) {
     const epochValue = Number(epochs) || 10;
     const isPreset = PRESET_EPOCHS.includes(epochValue);
     const selectValue = isPreset ? String(epochValue) : 'custom';
@@ -43,7 +34,13 @@ export function YoloTrainPanel({
                         disabled={isPending}
                         onChange={(e) => {
                             const value = e.target.value;
-                            if (value !== 'custom') onEpochsChange(Number(value));
+                            if (value === 'custom') {
+                                if (PRESET_EPOCHS.includes(epochValue)) {
+                                    onEpochsChange(15);
+                                }
+                                return;
+                            }
+                            onEpochsChange(Number(value));
                         }}
                     >
                         {PRESET_EPOCHS.map((n) => (
@@ -67,21 +64,6 @@ export function YoloTrainPanel({
                         />
                     </FieldLabel>
                 )}
-                <FieldLabel>
-                    GPU / device
-                    <Select
-                        value={device}
-                        disabled={isPending}
-                        onChange={(e) => onDeviceChange?.(e.target.value)}
-                    >
-                        {DEVICE_OPTIONS.map((item) => (
-                            <option key={item.value} value={item.value}>
-                                {item.label}
-                            </option>
-                        ))}
-                    </Select>
-                </FieldLabel>
-                <Hint>세션: {sessionId || '라벨이 있는 모든 세션'}</Hint>
                 <RowButton type="button" disabled={isPending} onClick={onTrain}>
                     {isPending ? '훈련 중…' : `YOLO 훈련 시작 (${epochValue} epochs)`}
                 </RowButton>

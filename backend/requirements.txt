@@ -1,26 +1,37 @@
+# Web
 fastapi
 uvicorn[standard]
+python-multipart
+
+# Database
 sqlalchemy
 psycopg2-binary
-redis
+redis>=5.0.0
+
+# Auth
 PyJWT
 bcrypt
-pydantic-settings
-python-multipart
-email-validator
 
-openai
+# Config / validation
+pydantic-settings
+email-validator
 python-dotenv
-pillow
-transformers
+
+# OpenAI
+openai
+
+# Data / ML
 pandas
 numpy
 scikit-learn
+transformers
+
+# Image / vision
+pillow
+ultralytics
+opencv-python>=4.8.0,<4.13.0
 
 # torch는 Dockerfile에서 CPU wheel로 설치하는 것을 권장
 # (여기 두면 기본 CUDA/큰 wheel이 받아질 수 있음)
 # torch
 # torchvision
-
-ultralytics
-opencv-python>=4.8.0,<4.13.0

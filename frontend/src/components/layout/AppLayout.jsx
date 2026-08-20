@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AuthModal } from '../auth/AuthModal';
 import { clearTokens, isLoggedIn } from '../../api/token';
-import { ContentArea, LayoutBody, LayoutRoot } from './AppLayout.styles';
+import { ContentArea, ContentViewport, LayoutBody, LayoutRoot } from './AppLayout.styles';
 import { HeaderBar } from './HeaderBar';
 import { Sidebar } from './Sidebar';
 
@@ -21,6 +21,7 @@ export function AppLayout() {
                 loggedIn={loggedIn}
                 onLogin={openLogin}
                 onRegister={() => setAuthMode('register')}
+                onHome={() => navigate('/')}
                 onLogout={() => {
                     clearTokens();
                     setLoggedIn(false);
@@ -39,7 +40,9 @@ export function AppLayout() {
                     onNavigate={(path) => navigate(path)}
                 />
                 <ContentArea>
-                    <Outlet context={{ loggedIn, openLogin }} />
+                    <ContentViewport>
+                        <Outlet context={{ loggedIn, openLogin }} />
+                    </ContentViewport>
                 </ContentArea>
             </LayoutBody>
 

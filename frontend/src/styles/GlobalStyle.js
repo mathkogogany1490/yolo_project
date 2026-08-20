@@ -7,15 +7,19 @@ export const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
   }
 
-  html,
-  body,
-  #root {
-    min-height: 100%;
+  html {
+    height: 100%;
+    overflow: hidden;
   }
 
   body {
     margin: 0;
-    min-height: 100svh;
+    height: 100dvh;
+    height: 100svh;
+    max-height: 100dvh;
+    max-height: 100svh;
+    min-height: 0;
+    overflow: hidden;
     font: 18px/145% ${({ theme }) => theme.fonts.sans};
     letter-spacing: 0.18px;
     color: ${({ theme }) => theme.colors.text};
@@ -35,8 +39,11 @@ export const GlobalStyle = createGlobalStyle`
   #root {
     width: 100%;
     max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
     margin: 0 auto;
-    min-height: 100svh;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     background: transparent;

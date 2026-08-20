@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ChartView from '../../components/lectureRag/ChartView';
 import '../../components/lectureRag/lectureRag.css';
@@ -25,13 +25,71 @@ function detachRecognizer(rec) {
     }
 }
 
+function renderSummaryChartPane(item) {
+    const showTitle = Boolean(item.title) && item.type !== 'bullets' && item.type !== 'biplot';
+    return (
+        <>
+            {showTitle ? <p className="chart-pane-title">{item.title}</p> : null}
+            <ChartView chart={item} />
+        </>
+    );
+}
+
+function SummaryLayout({ charts }) {
+    const bullets = charts.find((item) => item.type === 'bullets');
+    const biplot = charts.find((item) => item.type === 'biplot');
+    const eigenTable = charts.find(
+        (item) => item.type === 'table' && item.columns?.some((col) => col.includes('성분 4축')),
+    );
+    const lengthTable = charts.find(
+        (item) => item.type === 'table' && item.columns?.includes('길이'),
+    );
+
+    return (
+        <>
+            <div className="summary-left-column">
+                {bullets ? (
+                    <div className="chart-pane summary-bullets-pane">{renderSummaryChartPane(bullets)}</div>
+                ) : null}
+                {biplot ? (
+                    <div className="chart-pane summary-biplot-pane">{renderSummaryChartPane(biplot)}</div>
+                ) : null}
+            </div>
+            <div className="summary-right-column">
+                {eigenTable ? (
+                    <div className="chart-pane summary-eigen-pane">{renderSummaryChartPane(eigenTable)}</div>
+                ) : null}
+                {lengthTable ? (
+                    <div className="chart-pane summary-length-pane">{renderSummaryChartPane(lengthTable)}</div>
+                ) : null}
+            </div>
+        </>
+    );
+}
+
+function compactHeard(text) {
+    return text.replace(/\s+/g, '').replace(/[.,!?~]/g, '').toLowerCase();
+}
+
 function isVoiceStartCommand(text) {
-    const compact = text.replace(/\s+/g, '').replace(/[.,!?~]/g, '').toLowerCase();
+    const compact = compactHeard(text);
     return (
         compact.includes('음성인식해주세요') ||
         compact.includes('음성인식해줘') ||
-        compact.includes('음성시작해 주세요'.replace(/\s+/g, '')) ||
+        compact.includes('음성시작해주세요') ||
         compact.includes('마이크켜주세요')
+    );
+}
+
+function isCompleteCommand(text) {
+    const compact = compactHeard(text);
+    return (
+        compact.includes('보여줘') ||
+        compact.includes('보여줘요') ||
+        compact.includes('보여주') ||
+        compact.includes('다음그래프') ||
+        compact.includes('다음화면') ||
+        compact.includes('다음차트')
     );
 }
 
@@ -44,16 +102,61 @@ function foldPcaHeard(text) {
         '피씨아이',
         '비씨에이',
         '티씨에이',
+        '오티씨에이',
         '피씨에',
         '피시에',
+        '피씨',
+        '피시',
+        'pc에이',
+        'pc야',
     ];
     let next = text;
     for (const alias of [...aliases].sort((left, right) => right.length - left.length)) {
-        next = next.replace(new RegExp(alias, 'gi'), 'PCA');
+        next = next.replace(new RegExp(alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), 'PCA');
     }
     next = next.replace(/\bp\s*[.\s]*c\s*[.\s]*a\b/gi, 'PCA');
     next = next.replace(/\bpc\b/gi, 'PCA');
+    next = next.replace(/보여?\s*주세[요세요]?/g, '보여 주세요');
+    next = next.replace(/보여줘/g, '보여 주세요');
     return next;
+}
+
+const HEARD_HINTS = [
+    '보여줘',
+    '보여줘요',
+    'pca',
+    '피씨',
+    '피시',
+    '비씨',
+    '주성분',
+    '고유',
+    '고윳',
+    '붓꽃',
+    '아이리스',
+    '공분산',
+    '선형',
+    '판별',
+    'lda',
+    '요약',
+    '바이플롯',
+    '예측',
+    'svd',
+];
+
+function pickHeard(result) {
+    let best = result[0]?.transcript ?? '';
+    let bestScore = -1;
+    for (let i = 0; i < result.length; i += 1) {
+        const text = result[i].transcript ?? '';
+        const compact = compactHeard(text);
+        const hints = HEARD_HINTS.filter((hint) => compact.includes(hint)).length;
+        const score = hints * 2 + (result[i].confidence || 0);
+        if (score > bestScore) {
+            bestScore = score;
+            best = text;
+        }
+    }
+    return best.trim();
 }
 
 function layoutCharts(charts, scene) {
@@ -67,15 +170,22 @@ function layoutCharts(charts, scene) {
         }
     }
     if (scene === 'iris_cov_eigen') {
-        const bullets = charts.find((item) => item.type === 'bullets');
         const heatmap = charts.find((item) => item.type === 'heatmap');
         const table = charts.find((item) => item.type === 'table');
-        const ordered = [bullets, heatmap, table].filter(Boolean);
-        if (bullets && heatmap && table) {
+        const ordered = [heatmap, table].filter(Boolean);
+        if (heatmap && table) {
             return { layout: 'iris-cov', charts: ordered };
         }
     }
-    if (scene === 'iris_pca_2d' || scene === 'iris_lda') {
+    if (scene === 'iris_pca_2d') {
+        const scatter = charts.find((item) => item.type === 'scatter');
+        const table = charts.find((item) => item.type === 'table');
+        const ordered = [scatter, table].filter(Boolean);
+        if (scatter && table) {
+            return { layout: 'iris-pca', charts: ordered };
+        }
+    }
+    if (scene === 'iris_lda') {
         const bullets = charts.find((item) => item.type === 'bullets');
         const scatter = charts.find((item) => item.type === 'scatter');
         const table = charts.find((item) => item.type === 'table');
@@ -87,11 +197,120 @@ function layoutCharts(charts, scene) {
     if (scene === 'summary') {
         const bullets = charts.find((item) => item.type === 'bullets');
         const biplot = charts.find((item) => item.type === 'biplot');
-        const explain = charts.find((item) => item.type === 'table');
-        const ordered = [bullets, biplot, explain].filter(Boolean);
-        if (bullets && biplot) {
+        const eigenTable = charts.find(
+            (item) => item.type === 'table' && item.columns?.some((col) => col.includes('성분 4축')),
+        );
+        const lengthTable = charts.find(
+            (item) => item.type === 'table' && item.columns?.includes('길이'),
+        );
+        const ordered = [bullets, biplot, eigenTable, lengthTable].filter(Boolean);
+        if (bullets && biplot && eigenTable && lengthTable) {
             return { layout: 'summary', charts: ordered };
         }
+    }
+    if (scene === 'mf_embedding') {
+        const bullets = charts.find((item) => item.type === 'bullets');
+        const pdf = charts.find(
+            (item) => item.type === 'distribution_line' && item.variant === 'pdf',
+        );
+        const class1 = charts.find((item) => item.type === 'table' && item.title === '클래스1 임베딩');
+        const class2 = charts.find((item) => item.type === 'table' && item.title === '클래스2 임베딩');
+        const ordered = [bullets, pdf, class1, class2].filter(Boolean);
+        if (bullets && pdf && class1 && class2) {
+            return { layout: 'mf-embedding', charts: ordered };
+        }
+    }
+    if (scene === 'mf_model') {
+        const bullets = charts.find((item) => item.type === 'bullets');
+        const movieW = charts.find((item) => item.type === 'table' && item.title === '영화 A 임베딩 × W');
+        const userW = charts.find((item) => item.type === 'table' && item.title === '홍길동 임베딩 × W');
+        const dot = charts.find((item) => item.type === 'table' && item.title === '내적 → 예측 평점과 오차');
+        const ordered = [bullets, movieW, userW, dot].filter(Boolean);
+        if (bullets && movieW && userW && dot) {
+            return { layout: 'mf-model', charts: ordered };
+        }
+    }
+    if (scene === 'mf_training') {
+        const bullets = charts.find((item) => item.type === 'bullets');
+        const diagram = charts.find((item) => item.type === 'mf_network');
+        const ordered = [bullets, diagram].filter(Boolean);
+        if (bullets && diagram) {
+            return { layout: 'mf-network', charts: ordered };
+        }
+    }
+    if (scene === 'mf_ratings') {
+        const bullets = charts.find((item) => item.type === 'bullets');
+        const ratings = charts.find(
+            (item) => item.type === 'table' && item.title === '영화 × 고객 평점 테이블',
+        );
+        const movieEmb = charts.find((item) => item.type === 'table' && item.title === '영화 임베딩');
+        const customerEmb = charts.find((item) => item.type === 'table' && item.title === '고객 임베딩');
+        const ordered = [bullets, ratings, movieEmb, customerEmb].filter(Boolean);
+        if (bullets && ratings && movieEmb && customerEmb) {
+            return { layout: 'mf-ratings', charts: ordered };
+        }
+    }
+    if (scene === 'tf_attention') {
+        const bullets = charts.find((item) => item.type === 'bullets');
+        const ratings = charts.find(
+            (item) => item.type === 'table' && item.title === '영화 × 고객 평점 테이블',
+        );
+        const query = charts.find((item) => item.type === 'table' && String(item.title).startsWith('Query Q'));
+        const key = charts.find((item) => item.type === 'table' && String(item.title).startsWith('Key K'));
+        const ordered = [bullets, ratings, query, key].filter(Boolean);
+        if (bullets && ratings && query && key) {
+            return { layout: 'tf-qk', charts: ordered };
+        }
+    }
+    if (scene === 'tf_multihead') {
+        const bullets = charts.find((item) => item.type === 'bullets');
+        const softmax = charts.find(
+            (item) => item.type === 'table' && String(item.title).startsWith('softmax'),
+        );
+        const attn = charts.find(
+            (item) => item.type === 'table' && String(item.title).startsWith('Attention'),
+        );
+        const ordered = [bullets, softmax, attn].filter(Boolean);
+        if (bullets && softmax && attn) {
+            return { layout: 'tf-attention', charts: ordered };
+        }
+    }
+    if (scene === 'tf_encoder') {
+        const bullets = charts.find(
+            (item) => item.type === 'bullets' && item.title === 'Embedding',
+        );
+        const embeddingTable = charts.find(
+            (item) => item.type === 'table' && item.title === 'Query · Key 임베딩 값',
+        );
+        const valueTable = charts.find(
+            (item) => item.type === 'table' && item.title === '객체 임베딩 × 가중치',
+        );
+        const valueEmbeddingTable = charts.find(
+            (item) => item.type === 'table' && item.title === 'Value 임베딩 값',
+        );
+        const ordered = [bullets, embeddingTable, valueTable, valueEmbeddingTable].filter(Boolean);
+        if (bullets && embeddingTable && valueTable && valueEmbeddingTable) {
+            return { layout: 'tf-embedding', charts: ordered };
+        }
+    }
+    if (scene === 'tf_diagram') {
+        const bullets = charts.find((item) => item.type === 'bullets');
+        const diagram = charts.find((item) => item.type === 'tf_network');
+        const ordered = [bullets, diagram].filter(Boolean);
+        if (bullets && diagram) {
+            return { layout: 'tf-network', charts: ordered };
+        }
+    }
+    if (scene === 'svd_ratings') {
+        const bullets = charts.find((item) => item.type === 'bullets');
+        const table = charts.find((item) => item.type === 'table');
+        const ordered = [bullets, table].filter(Boolean);
+        if (bullets && table) {
+            return { layout: 'svd-ratings', charts: ordered };
+        }
+    }
+    if (scene === 'svd_decompose') {
+        return { layout: 'svd-decompose', charts };
     }
     if (scene !== 'eigen_demo') {
         return { layout: 'default', charts };
@@ -112,7 +331,10 @@ function paneClass(layout, item) {
     if (layout === 'eigen' && item.type === 'eigen_scatter') return 'chart-pane eigen-graph-pane';
     if (layout === 'summary' && item.type === 'bullets') return 'chart-pane summary-bullets-pane';
     if (layout === 'summary' && item.type === 'biplot') return 'chart-pane summary-biplot-pane';
-    if (layout === 'summary' && item.type === 'table') return 'chart-pane summary-explain-pane';
+    if (layout === 'summary' && item.type === 'table' && item.columns?.includes('길이')) {
+        return 'chart-pane summary-length-pane';
+    }
+    if (layout === 'summary' && item.type === 'table') return 'chart-pane summary-eigen-pane';
     if (layout === 'iris-pca' && item.type === 'bullets') return 'chart-pane iris-pca-bullets-pane';
     if (layout === 'iris-pca' && item.type === 'scatter') return 'chart-pane iris-pca-scatter-pane';
     if (layout === 'iris-pca' && item.type === 'table') return 'chart-pane iris-pca-table-pane';
@@ -126,6 +348,82 @@ function paneClass(layout, item) {
     if (layout === 'iris' && item.type === 'table' && item.title.includes('품종')) {
         return 'chart-pane iris-counts-pane';
     }
+    if (layout === 'mf-embedding' && item.type === 'bullets') return 'chart-pane mf-embedding-bullets-pane';
+    if (layout === 'mf-embedding' && item.type === 'distribution_line' && item.variant === 'pdf') {
+        return 'chart-pane mf-embedding-pdf-pane';
+    }
+    if (layout === 'mf-embedding' && item.type === 'table' && item.title === '클래스1 임베딩') {
+        return 'chart-pane mf-embedding-class1-pane';
+    }
+    if (layout === 'mf-embedding' && item.type === 'table' && item.title === '클래스2 임베딩') {
+        return 'chart-pane mf-embedding-class2-pane';
+    }
+    if (layout === 'mf-model' && item.type === 'bullets') return 'chart-pane mf-model-bullets-pane';
+    if (layout === 'mf-model' && item.type === 'table' && item.title === '영화 A 임베딩 × W') {
+        return 'chart-pane mf-model-movie-pane';
+    }
+    if (layout === 'mf-model' && item.type === 'table' && item.title === '홍길동 임베딩 × W') {
+        return 'chart-pane mf-model-user-pane';
+    }
+    if (layout === 'mf-model' && item.type === 'table' && item.title === '내적 → 예측 평점과 오차') {
+        return 'chart-pane mf-model-dot-pane';
+    }
+    if (layout === 'mf-network' && item.type === 'bullets') return 'chart-pane mf-network-bullets-pane';
+    if (layout === 'mf-network' && item.type === 'mf_network') {
+        return 'chart-pane mf-network-diagram-pane';
+    }
+    if (layout === 'mf-ratings' && item.type === 'bullets') return 'chart-pane mf-ratings-bullets-pane';
+    if (layout === 'mf-ratings' && item.type === 'table' && item.title === '영화 × 고객 평점 테이블') {
+        return 'chart-pane mf-ratings-table-pane';
+    }
+    if (layout === 'mf-ratings' && item.type === 'table' && item.title === '영화 임베딩') {
+        return 'chart-pane mf-ratings-movie-embed-pane';
+    }
+    if (layout === 'mf-ratings' && item.type === 'table' && item.title === '고객 임베딩') {
+        return 'chart-pane mf-ratings-customer-embed-pane';
+    }
+    if (layout === 'tf-qk' && item.type === 'bullets') return 'chart-pane tf-qk-bullets-pane';
+    if (layout === 'tf-qk' && item.type === 'table' && item.title === '영화 × 고객 평점 테이블') {
+        return 'chart-pane tf-qk-ratings-pane';
+    }
+    if (layout === 'tf-qk' && item.type === 'table' && String(item.title).startsWith('Query Q')) {
+        return 'chart-pane tf-qk-query-pane';
+    }
+    if (layout === 'tf-qk' && item.type === 'table' && String(item.title).startsWith('Key K')) {
+        return 'chart-pane tf-qk-key-pane';
+    }
+    if (layout === 'tf-attention' && item.type === 'bullets') return 'chart-pane tf-attention-bullets-pane';
+    if (layout === 'tf-attention' && item.type === 'table' && String(item.title).startsWith('softmax')) {
+        return 'chart-pane tf-attention-softmax-pane';
+    }
+    if (layout === 'tf-attention' && item.type === 'table' && String(item.title).startsWith('Attention')) {
+        return 'chart-pane tf-attention-table-pane';
+    }
+    if (layout === 'tf-embedding' && item.type === 'bullets') {
+        return 'chart-pane tf-embedding-pane tf-embedding-left-pane';
+    }
+    if (layout === 'tf-embedding' && item.type === 'table' && item.title === 'Query · Key 임베딩 값') {
+        return 'chart-pane tf-embedding-pane tf-embedding-left-bottom-pane';
+    }
+    if (layout === 'tf-embedding' && item.type === 'table' && item.title === '객체 임베딩 × 가중치') {
+        return 'chart-pane tf-embedding-pane tf-embedding-right-top-pane';
+    }
+    if (layout === 'tf-embedding' && item.type === 'table' && item.title === 'Value 임베딩 값') {
+        return 'chart-pane tf-embedding-pane tf-embedding-right-bottom-pane';
+    }
+    if (layout === 'tf-network' && item.type === 'bullets') return 'chart-pane tf-network-bullets-pane';
+    if (layout === 'tf-network' && item.type === 'tf_network') {
+        return 'chart-pane tf-network-diagram-pane';
+    }
+    if (layout === 'svd-ratings' && item.type === 'bullets') return 'chart-pane svd-ratings-bullets-pane';
+    if (layout === 'svd-ratings' && item.type === 'table') return 'chart-pane svd-ratings-table-pane';
+    if (layout === 'svd-decompose' && item.type === 'matrix_product' && item.variant === 'predict') {
+        return 'chart-pane svd-decompose-table-pane svd-predict-pane';
+    }
+    if (layout === 'svd-decompose' && item.type === 'matrix_product') {
+        return 'chart-pane svd-decompose-table-pane svd-verify-pane';
+    }
+    if (layout === 'svd-decompose') return 'chart-pane svd-decompose-table-pane';
     return 'chart-pane';
 }
 
@@ -137,6 +435,22 @@ const SCENE_IDS = new Set([
     'iris_pca_2d',
     'iris_lda',
     'summary',
+    'svd_intro',
+    'svd_ratings',
+    'svd_decompose',
+    'svd_summary',
+    'mf_intro',
+    'mf_embedding',
+    'mf_ratings',
+    'mf_model',
+    'mf_training',
+    'mf_summary',
+    'tf_intro',
+    'tf_attention',
+    'tf_multihead',
+    'tf_encoder',
+    'tf_diagram',
+    'tf_summary',
 ]);
 
 export function LectureRagPage() {
@@ -151,6 +465,8 @@ export function LectureRagPage() {
     const sceneRef = useRef('intro');
     const recRef = useRef(null);
     const listeningRef = useRef(false);
+    const pendingHeardRef = useRef('');
+    const heardTimerRef = useRef(0);
     const requestRef = useRef(0);
     const chartGridRef = useRef(null);
     const handledSceneRef = useRef(null);
@@ -187,6 +503,7 @@ export function LectureRagPage() {
 
     useEffect(() => () => {
         listeningRef.current = false;
+        window.clearTimeout(heardTimerRef.current);
         detachRecognizer(recRef.current);
         recRef.current = null;
     }, []);
@@ -262,9 +579,11 @@ export function LectureRagPage() {
         rec.lang = 'ko-KR';
         rec.continuous = true;
         rec.interimResults = true;
-        rec.maxAlternatives = 1;
+        rec.maxAlternatives = 3;
         recRef.current = rec;
         listeningRef.current = true;
+        pendingHeardRef.current = '';
+        window.clearTimeout(heardTimerRef.current);
 
         rec.onstart = () => {
             setListening(true);
@@ -274,16 +593,26 @@ export function LectureRagPage() {
         rec.onresult = (event) => {
             let live = '';
             for (let i = event.resultIndex; i < event.results.length; i += 1) {
-                const piece = event.results[i][0].transcript.trim();
+                const piece = pickHeard(event.results[i]);
                 if (!piece) continue;
                 if (event.results[i].isFinal) {
-                    setInterim('');
-                    void applyTurn(piece);
+                    pendingHeardRef.current = `${pendingHeardRef.current} ${piece}`.trim();
+                    setInterim(pendingHeardRef.current);
+                    window.clearTimeout(heardTimerRef.current);
+                    const waitMs = isCompleteCommand(pendingHeardRef.current) ? 350 : 1100;
+                    heardTimerRef.current = window.setTimeout(() => {
+                        const heard = pendingHeardRef.current.trim();
+                        pendingHeardRef.current = '';
+                        setInterim('');
+                        if (heard) void applyTurn(heard);
+                    }, waitMs);
                 } else {
                     live += piece;
                 }
             }
-            if (live) setInterim(live);
+            if (live) {
+                setInterim(`${pendingHeardRef.current} ${live}`.trim());
+            }
         };
 
         rec.onerror = (event) => {
@@ -337,10 +666,14 @@ export function LectureRagPage() {
 
     function stopListening() {
         listeningRef.current = false;
+        window.clearTimeout(heardTimerRef.current);
+        const heard = pendingHeardRef.current.trim();
+        pendingHeardRef.current = '';
         detachRecognizer(recRef.current);
         recRef.current = null;
         setListening(false);
         setInterim('');
+        if (heard) void applyTurn(heard);
     }
 
     const rawCharts =
@@ -355,46 +688,49 @@ export function LectureRagPage() {
     const isIrisCovLayout = layout === 'iris-cov';
     const isIrisPcaLayout = layout === 'iris-pca';
     const isSummaryLayout = layout === 'summary';
+    const isSvdRatingsLayout = layout === 'svd-ratings';
+    const isMfRatingsLayout = layout === 'mf-ratings';
+    const isMfModelLayout = layout === 'mf-model';
+    const isMfNetworkLayout = layout === 'mf-network';
+    const isTfQkLayout = layout === 'tf-qk';
+    const isTfAttentionLayout = layout === 'tf-attention';
+    const isTfEmbeddingLayout = layout === 'tf-embedding';
+    const isTfNetworkLayout = layout === 'tf-network';
+    const isMfEmbeddingLayout = layout === 'mf-embedding';
 
-    useLayoutEffect(() => {
-        if (!isSummaryLayout) return;
-        const grid = chartGridRef.current;
-        if (!grid) return;
-
-        const align = () => {
-            const pane = grid.querySelector('.summary-biplot-pane');
-            const pc1 = grid.querySelector('.summary-biplot-pane .biplot-x-label');
-            const items = grid.querySelectorAll('.summary-bullets-pane .intro-summary-list li');
-            const arrowItem = Array.from(items).find((el) => (el.textContent ?? '').startsWith('화살표'));
-            if (!pane || !pc1 || !arrowItem) return;
-
-            pane.style.setProperty('--biplot-shift', '0px');
-            const range = document.createRange();
-            range.selectNodeContents(arrowItem);
-            const rects = Array.from(range.getClientRects());
-            if (rects.length === 0) return;
-            const textRight = Math.max(...rects.map((rect) => rect.right));
-            const pc1Left = pc1.getBoundingClientRect().left;
-            pane.style.setProperty('--biplot-shift', `${Math.round(textRight - pc1Left) - 54}px`);
-        };
-
-        align();
-        const observer = new ResizeObserver(align);
-        observer.observe(grid);
-        window.addEventListener('resize', align);
-        return () => {
-            observer.disconnect();
-            window.removeEventListener('resize', align);
-        };
-    }, [isSummaryLayout, visibleCharts]);
+    const useGridLayout =
+        visibleCharts.length > 1 ||
+        isTfEmbeddingLayout ||
+        isTfQkLayout ||
+        isTfAttentionLayout;
 
     const gridClass =
-        visibleCharts.length > 1
+        useGridLayout
             ? isEigenLayout
                 ? 'chart-grid eigen-layout'
                 : isSummaryLayout
                   ? 'chart-grid summary-layout'
-                  : isIrisPcaLayout
+                  : isMfEmbeddingLayout
+                    ? 'chart-grid mf-embedding-layout'
+                    : isMfModelLayout
+                      ? 'chart-grid mf-model-layout'
+                    : isMfNetworkLayout
+                      ? 'chart-grid mf-network-layout'
+                    : isMfRatingsLayout
+                      ? 'chart-grid mf-ratings-layout'
+                    : isTfQkLayout
+                      ? 'chart-grid tf-qk-layout'
+                    : isTfAttentionLayout
+                      ? 'chart-grid tf-attention-layout'
+                    : isTfEmbeddingLayout
+                      ? 'chart-grid tf-embedding-layout'
+                    : isTfNetworkLayout
+                      ? 'chart-grid tf-network-layout'
+                    : isSvdRatingsLayout
+                    ? 'chart-grid svd-ratings-layout'
+                    : layout === 'svd-decompose'
+                    ? 'chart-grid svd-decompose-layout'
+                    : isIrisPcaLayout
                     ? 'chart-grid iris-pca-layout'
                     : isIrisCovLayout
                       ? 'chart-grid iris-cov-layout'
@@ -403,45 +739,87 @@ export function LectureRagPage() {
                         : 'chart-grid'
             : 'chart-frame';
 
+    const isTfCompactShell =
+        turn?.scene === 'tf_attention' ||
+        turn?.scene === 'tf_multihead' ||
+        turn?.scene === 'tf_encoder';
+    const isTfEmbeddingShell = turn?.scene === 'tf_encoder';
+
     return (
-        <div className="lecture-rag-shell">
+        <div
+            className={
+                turn?.scene === 'svd_decompose'
+                    ? 'lecture-rag-shell lecture-rag-shell--svd-decompose'
+                    : isTfEmbeddingShell
+                      ? 'lecture-rag-shell lecture-rag-shell--tf-compact lecture-rag-shell--tf-embedding-shell'
+                    : isTfCompactShell
+                      ? 'lecture-rag-shell lecture-rag-shell--tf-compact'
+                      : 'lecture-rag-shell'
+            }
+        >
             <main className="stage">
                 <div className="stage-body">
                     {notice ? <p className="lecture-notice">{notice}</p> : null}
-                    {turn?.heard ? <p className="stage-heard">들은 말 · {turn.heard}</p> : null}
                     {turn?.explanation ? <p className="stage-caption">{turn.explanation}</p> : null}
+                    {(isEigenLayout || isIrisLayout || isIrisCovLayout || isIrisPcaLayout || turn?.scene === 'svd_decompose') && turn?.title ? (
+                        <h2 className="scene-heading">{turn.title}</h2>
+                    ) : isEigenLayout || isIrisLayout || isIrisCovLayout || isIrisPcaLayout ? (
+                        <h2 className="scene-heading">
+                            {isEigenLayout
+                                ? '고유값과 고유벡터의 의미'
+                                : isIrisLayout
+                                  ? 'Iris(붓꽃) 데이터'
+                                  : isIrisPcaLayout
+                                    ? '차원 축소 선형 변환(PCA)'
+                                    : '붓꽃의 공분산과 고유값 및 고유벡터'}
+                        </h2>
+                    ) : null}
                     {visibleCharts.length > 0 ? (
                         <div ref={chartGridRef} className={gridClass}>
-                            {visibleCharts.map((item, index) => (
-                                <div
-                                    key={`${item.type}-${item.title}-${index}`}
-                                    className={paneClass(layout, item)}
-                                >
-                                    {(visibleCharts.length > 1 ||
-                                        isEigenLayout ||
-                                        isIrisLayout ||
-                                        isIrisCovLayout ||
-                                        isIrisPcaLayout ||
-                                        isSummaryLayout) &&
-                                    item.type !== 'bullets' ? (
-                                        <p className="chart-pane-title">{item.title}</p>
-                                    ) : null}
-                                    {(isEigenLayout ||
-                                        isIrisLayout ||
-                                        isIrisCovLayout ||
-                                        isIrisPcaLayout ||
-                                        (isSummaryLayout && item.variant !== 'intro')) &&
-                                    item.type === 'bullets' ? (
-                                        <p className="chart-pane-title">{item.title}</p>
-                                    ) : null}
-                                    <ChartView chart={item} />
-                                </div>
-                            ))}
+                            {isSummaryLayout ? (
+                                <SummaryLayout charts={visibleCharts} />
+                            ) : (
+                                visibleCharts.map((item, index) => (
+                                    <div
+                                        key={`${item.type}-${item.title}-${index}`}
+                                        className={paneClass(layout, item)}
+                                    >
+                                        {(visibleCharts.length > 1 ||
+                                            isEigenLayout ||
+                                            isIrisCovLayout ||
+                                            isIrisPcaLayout ||
+                                            isMfEmbeddingLayout ||
+                                            isMfRatingsLayout ||
+                                            isMfModelLayout ||
+                                            isMfNetworkLayout ||
+                                            isTfQkLayout ||
+                                            isTfAttentionLayout ||
+                                            isTfEmbeddingLayout ||
+                                            isTfNetworkLayout) &&
+                                        item.type !== 'bullets' &&
+                                        item.type !== 'matrix_pair' &&
+                                        item.type !== 'matrix_product' &&
+                                        item.type !== 'matrix_equation' &&
+                                        item.type !== 'mf_network' &&
+                                        item.type !== 'tf_network' &&
+                                        !isIrisLayout &&
+                                        item.title ? (
+                                            <p className="chart-pane-title">{item.title}</p>
+                                        ) : null}
+                                        {(isIrisCovLayout) &&
+                                        item.type === 'bullets' &&
+                                        item.title ? (
+                                            <p className="chart-pane-title">{item.title}</p>
+                                        ) : null}
+                                        <ChartView chart={item} />
+                                    </div>
+                                ))
+                            )}
                         </div>
                     ) : (
                         <div className="talk-card">
                             <h3>{turn?.title}</h3>
-                            <p>{turn?.explanation ?? '왼쪽 장면을 선택하거나 아래에 말씀해 주세요.'}</p>
+                            <p>{turn?.explanation ?? '왼쪽 메뉴에서 선택하거나 아래에 말씀해 주세요.'}</p>
                         </div>
                     )}
                 </div>

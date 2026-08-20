@@ -13,11 +13,10 @@ def iris_bullet_items() -> list[str]:
     bundle = load_iris()
     labels = " · ".join(iris_species_label(str(name)) for name in bundle.target_names)
     return [
-        "독립변수(속성) · 꽃받침길이(sepal length) · 꽃받침너비(sepal width) · "
-        "꽃잎길이(petal length) ·\n꽃잎너비(petal width) — 단위 cm, 숫자 4개",
-        f"라벨(종속변수) · 품종 — {labels}",
-        "관측치 · 총 150개 (품종별 50개씩 균등)",
-        "PCA 목적 · 4차원 측정값을 적은 축으로 요약해 품종 패턴을 봅니다",
+        "독립변수(속성) : 꽃받침길이(sepal length) · 꽃받침너비(sepal width) · "
+        "꽃잎길이(petal length) · 꽃잎너비(petal width)",
+        f"종속변수 : 품종 — {labels}",
+        "관측 데이터 개수 : 150개",
     ]
 
 

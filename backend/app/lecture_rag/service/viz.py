@@ -8,10 +8,32 @@ import pandas as pd
 from .data import numeric_columns
 from .eigen import make_eigen_scatter_chart, make_eigen_table_chart
 from .iris import make_iris_full_table, make_iris_label_counts_table
+from .mf import (
+    make_mf_dl_dot_tables,
+    make_mf_embedding_class_tables,
+    make_mf_network_chart,
+    make_mf_ratings_embedding_tables,
+    make_mf_ratings_table,
+    make_normal_cdf_chart,
+    make_normal_pdf_chart,
+)
+from .transformer import (
+    make_tf_attention_table,
+    make_tf_customer_embedding_table,
+    make_tf_network_chart,
+    make_tf_query_key_tables,
+    make_tf_ratings_table,
+    make_tf_softmax_formula_table,
+    make_tf_value_embedding_table,
+    make_tf_value_weight_table,
+)
+from .svd import make_svd_decompose_tables, make_svd_ratings_table
 from .iris_lda import make_iris_lda_scatter_chart, make_iris_lda_weight_table
 from .iris_cov import (
     make_iris_biplot_chart,
+    make_iris_biplot_eigen_table,
     make_iris_biplot_explain_table,
+    make_iris_biplot_length_table,
     make_iris_cov_heatmap_chart,
     make_iris_eigen_table_chart,
     make_iris_pca_scatter_chart,
@@ -180,9 +202,13 @@ def make_bullets(
     items: list[str],
     title: str | None = None,
     variant: str | None = None,
+    footnote: dict[str, Any] | str | None = None,
+    extra_footnotes: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     cleaned = [str(item).strip() for item in items if str(item).strip()]
-    if not cleaned:
+    extra = extra_footnotes or []
+    has_intro_title = variant == "intro" and bool((title or "").strip())
+    if not cleaned and not footnote and not extra and not has_intro_title:
         return {"type": "none"}
     chart: dict[str, Any] = {
         "type": "bullets",
@@ -191,6 +217,10 @@ def make_bullets(
     }
     if variant in {"intro", "compact", "iris"}:
         chart["variant"] = variant
+    if footnote:
+        chart["footnote"] = footnote
+    if extra:
+        chart["extraFootnotes"] = extra
     return chart
 
 
@@ -243,7 +273,16 @@ def materialize_view(
         if not isinstance(items, list):
             items = [items]
         variant = str(view.get("variant") or "").strip() or None
-        return make_bullets([str(item) for item in items], title=title, variant=variant)
+        footnote = view.get("footnote")
+        raw_extra = view.get("extraFootnotes") or view.get("extra_footnotes") or []
+        extra_footnotes = [item for item in raw_extra if isinstance(item, dict)] if isinstance(raw_extra, list) else []
+        return make_bullets(
+            [str(item) for item in items],
+            title=title,
+            variant=variant,
+            footnote=footnote if isinstance(footnote, (dict, str)) else None,
+            extra_footnotes=extra_footnotes or None,
+        )
 
     if kind == "eigen_scatter":
         return make_eigen_scatter_chart(df)
@@ -263,8 +302,26 @@ def materialize_view(
         return make_iris_lda_weight_table(df)
     if kind == "iris_biplot" or kind == "biplot":
         return make_iris_biplot_chart(df)
+    if kind == "iris_biplot_eigen":
+        return make_iris_biplot_eigen_table(df)
+    if kind == "iris_biplot_length":
+        return make_iris_biplot_length_table(df)
     if kind == "iris_biplot_explain":
         return make_iris_biplot_explain_table(df)
+    if kind == "svd_ratings_table":
+        return make_svd_ratings_table()
+    if kind == "mf_ratings_table":
+        return make_mf_ratings_table()
+    if kind == "tf_ratings_table":
+        return make_tf_ratings_table()
+    if kind == "svd_decompose":
+        tables = make_svd_decompose_tables()
+        return tables[0] if tables else {"type": "none"}
+
+    if kind == "normal_pdf":
+        return make_normal_pdf_chart()
+    if kind == "normal_cdf":
+        return make_normal_cdf_chart()
 
     if kind in {"eigen_demo"}:
         x_col = _resolve(view.get("x") or view.get("x_column"), nums)
@@ -283,7 +340,44 @@ def materialize_views(
     pca: dict[str, Any] | None,
 ) -> list[dict[str, Any]]:
     charts: list[dict[str, Any]] = []
-    for view in views[:4]:
+    for view in views[:8]:
+        kind = str(view.get("type") or "").strip().lower()
+        if kind == "svd_decompose":
+            charts.extend(make_svd_decompose_tables())
+            continue
+        if kind == "mf_embedding_matrix":
+            charts.extend(make_mf_embedding_class_tables())
+            continue
+        if kind == "mf_ratings_embeddings":
+            charts.extend(make_mf_ratings_embedding_tables())
+            continue
+        if kind == "mf_dl_dot":
+            charts.extend(make_mf_dl_dot_tables())
+            continue
+        if kind == "mf_network":
+            charts.append(make_mf_network_chart())
+            continue
+        if kind == "tf_query_key":
+            charts.extend(make_tf_query_key_tables())
+            continue
+        if kind == "tf_softmax_formula":
+            charts.append(make_tf_softmax_formula_table())
+            continue
+        if kind == "tf_attention_calc":
+            charts.append(make_tf_attention_table())
+            continue
+        if kind == "tf_customer_embedding":
+            charts.append(make_tf_customer_embedding_table())
+            continue
+        if kind == "tf_value_weight":
+            charts.append(make_tf_value_weight_table())
+            continue
+        if kind == "tf_value_embedding":
+            charts.append(make_tf_value_embedding_table())
+            continue
+        if kind == "tf_network":
+            charts.append(make_tf_network_chart())
+            continue
         chart = materialize_view(view, df, pca)
         if chart.get("type") != "none":
             charts.append(chart)
