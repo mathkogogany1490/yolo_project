@@ -4,7 +4,6 @@
 !.env.example
 *.pem
 *.ppk
-/readme.txt
 
 # Python
 __pycache__/
